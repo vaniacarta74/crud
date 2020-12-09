@@ -1,0 +1,34 @@
+{
+    "name": "vaniacarta74/crud",
+    "description": "Applicazione per la gestione delle operazioni CRUD mediante architettura REST",
+    "minimum-stability": "stable",
+    "type": "library",
+    "keywords": ["CRUD", "RESTful"],    
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vania Carta",
+            "email": "vania.carta@me.com"
+        }
+    ],
+    "support": {
+        "source": "https://github.com/vaniacarta74/crud",
+        "issues": "https://github.com/vaniacarta74/crud/issues"
+    },
+    "require": {
+        "php": "^5.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.8"
+    },
+    "autoload": {
+         "psr-4": {
+            "vaniacarta74\\Scarichi\\": "src/" 
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "vaniacarta74\\Scarichi\\tests\\": "tests/" 
+        }
+    }
+}
