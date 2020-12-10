@@ -1,14 +1,13 @@
 <?php
-/*
+
+/* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
- *
- * @author vania
  */
-namespace vaniacarta74\Crud\tests;
 
-// TODO: check include path
-ini_set('include_path', '/var/www/html/sviluppo/include');
+namespace vaniacarta74\Crud\config;
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once('php_Router.inc.php');
+
+define('DEBUG_LEVEL', 2);

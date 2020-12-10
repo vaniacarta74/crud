@@ -22,13 +22,16 @@
         "phpunit/phpunit": "4.8"
     },
     "autoload": {
-         "psr-4": {
-            "vaniacarta74\\Scarichi\\": "src/" 
+        "files": [
+            "src/config/config.php"            
+        ],
+        "psr-4": {
+            "vaniacarta74\\Crud\\": "src/" 
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "vaniacarta74\\Scarichi\\tests\\": "tests/" 
+            "vaniacarta74\\Crud\\tests\\": "tests/" 
         }
     }
 }
