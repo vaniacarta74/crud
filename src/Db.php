@@ -22,17 +22,7 @@ class Db
     private static $user = MSSQL_USER;
     private static $password = MSSQL_PASSWORD;
     
-    public static function printConnectionString()
-    {
-        try {
-            return 'mssql://' . self::$host . '@' . self::$user . ':' . self::$password . '<br/>';
-        } catch (\Exception $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
-    public static function getPDO($db, $driver = null, $host = null, $user = null, $password = null)
+    public static function connect($db, $driver = null, $host = null, $user = null, $password = null)
     {
         try {
             $params = [
@@ -40,17 +30,47 @@ class Db
                 'driver' => isset($driver) ? $driver : self::$driver,
                 'host' => isset($host) ? $host : self::$host,
                 'user' => isset($user) ? $user : self::$user,
-                'password' => isset($password) ? $password : self::$password,
-                'attributes' => [
-                    \PDO::ATTR_PERSISTENT => true
-                ]
+                'password' => isset($password) ? $password : self::$password
             ];
             $key = md5(serialize($params));    
             $dsn = $params['driver'] . ':host=' . $params['host'] . ';dbname=' . $params['db'];
             if (!array_key_exists($key, $GLOBALS) || !($GLOBALS[$key] instanceof \PDO)) {
-                $GLOBALS[$key] = new \PDO($dsn, $params['user'], $params['password'], $params['attributes']);
+                $GLOBALS[$key] = new \PDO($dsn, $params['user'], $params['password']);
             }
             return $GLOBALS[$key];
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    public static function query($pdo, $queryFile, $queryParams)
+    {
+        try {
+            include __DIR__ . '/inc/query/' . $queryFile . '.php';
+            $stmt = $pdo->prepare($selectQuery);
+            $bindParams = array_merge_recursive($selectParams, $queryParams);
+            foreach ($bindParams as $param) {
+                $type = constant('\PDO::PARAM_' . strtoupper($param['type']));
+                $stmt->bindParam($param['bind'], $param['value'], $type);
+            }
+            $stmt->execute();
+            
+            return $stmt;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    public static function fetch($stmt, $style = null)
+    {
+        try {
+            $pdoStyle = isset($style) ? $style : \PDO::FETCH_ASSOC;
+            while ($row = $stmt->fetch($pdoStyle)) {
+                $records[] = $row;
+            }            
+            return $records;
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;

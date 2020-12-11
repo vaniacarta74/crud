@@ -9,51 +9,44 @@ namespace vaniacarta74\Crud;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-echo HOST . '<br/>';
-echo RDBMS . '<br/>';
-echo MSSQL_HOST . '<br/>';
-echo MSSQL_USER . '<br/>';
-echo MSSQL_PASSWORD . '<br/>';
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
 
-//echo Db::printConnectionString() . '<br/>';
-//
-//$dsn = "dblib:host=MacBook\SQL_SERVER_DEV;dbname=SSCP_data;";
-//
-//$db = new \PDO($dsn, "sa", "Race14Maggio2016");
+try {
+    $queryParams = [
+        'variabile' => [
+            //'value' => 10230
+            'value' => $_GET['var']        
+        ],
+        'tipoDato' => [
+            //'value' => 2
+            'value' => $_GET['type']
+        ],
+        'dataIniziale' => [
+            //'value' => '2017-01-11'
+            'value' => $_GET['datefrom']
+        ],
+        'dataFinale' => [
+            //'value' => '2017-01-12'
+            'value' => $_GET['dateto']
+        ]
+    ];
 
-$pdo = Db::getPDO('SSCP_data');
+    $pdo = Db::connect('SSCP_data');
 
-$query = "SELECT * FROM variabili WHERE id_variabile = 1";
+    $stmt = Db::query($pdo, 'query_dati_acquisiti', $queryParams);
 
-$stmt = $pdo->query($query);
+    $records = Db::fetch($stmt);
 
-foreach ($stmt as $row) {
-    var_dump($row);
+    $response = [
+        'ok' => true,
+        'records' => $records
+    ];    
+    http_response_code(200);
+    echo json_encode($response);
+} catch (\Exception $e) {
+    http_response_code(400);
+    Error::errorHandler($e, 1, 'cli');
+    Error::noticeHandler($e, 2, 'json');
+    exit();
 }
-
-var_dump($stmt);
-
-$pdo = Db::getPDO('SPT');
-
-$query = "SELECT * FROM variabili WHERE id_variabile = 51012";
-
-$stmt = $pdo->query($query);
-
-foreach ($stmt as $row) {
-    var_dump($row);
-}
-
-var_dump($stmt);
-
-$pdo = Db::getPDO('SSCP_data');
-
-$query = "SELECT * FROM variabili WHERE id_variabile = 1";
-
-$stmt = $pdo->query($query);
-
-foreach ($stmt as $row) {
-    var_dump($row);
-}
-
-var_dump($stmt);
-
