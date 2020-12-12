@@ -44,12 +44,12 @@ class Db
         }
     }
     
-    public static function query($pdo, $queryFile, $queryParams)
+    public static function query($pdo, $rawQuery, $bindParams)
     {
         try {
-            include __DIR__ . '/inc/query/' . $queryFile . '.php';
-            $stmt = $pdo->prepare($selectQuery);
-            $bindParams = array_merge_recursive($selectParams, $queryParams);
+            //include __DIR__ . '/inc/query/' . $queryFile . '.php';
+            $stmt = $pdo->prepare($rawQuery);
+            //$bindParams = array_merge_recursive($selectParams, $queryParams);
             foreach ($bindParams as $param) {
                 $type = constant('\PDO::PARAM_' . strtoupper($param['type']));
                 $stmt->bindParam($param['bind'], $param['value'], $type);
