@@ -15,12 +15,12 @@ $rawQuery = "SELECT
             FROM
                 dati_acquisiti
             WHERE
-                id_variabile = :id_variabile";
+                id_dato = :id_dato";
 
 $rawParams = [
     'variabile' => [
         'param' => 'id', 
-        'bind' => ':id_variabile',
+        'bind' => ':id_dato',
         'type' => 'int'
     ]
 ];

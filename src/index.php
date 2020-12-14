@@ -48,71 +48,37 @@ try {
     
     $baseRegex = $dbAlias . '\/' . $queryRoute;
     if (preg_match('/' . $baseRegex  . '$/', $path) && $method == 'GET') {
+        $crud = 'R';
         $queryFile = 'select_' . $queryTable;
         $queryParams = $_GET;
     } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'GET') {
-        $queryFile = 'select_' . $queryTable . 'by_id';
+        $crud = 'R';
+        $queryFile = 'select_' . $queryTable . '_by_id';
         $queryParams = ['id' => $matches[1]];
     } elseif (preg_match('/' . $baseRegex  . '$/', $path) && $method == 'POST') {
+        $crud = 'C';
         $queryFile = 'insert_' . $queryTable;
-        $queryParams = $_POST;
+        $post = file_get_contents('php://input');
+        $queryParams = json_decode($post, true);
     } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'PUT') {
+        $crud = 'U';
         $queryFile = 'update_' . $queryTable;
         $queryParams = ['id' => $matches[1]];
     } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'PATCH') {
+        $crud = 'U';
         $queryFile = 'update_' . $queryTable;
         $queryParams = ['id' => $matches[1]];
     } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'DELETE') {
+        $crud = 'D';
         $queryFile = 'delete_' . $queryTable;
         $queryParams = ['id' => $matches[1]];
     } else {
+        $crud = 'ND';
         $queryFile = 'NODEF';
         $queryParams = [];
     }   
 
     include __DIR__ . '/inc/query/' . $queryTable . '/' . $queryFile . '.php';
-    
-//    $queryParams = [
-//        'variabile' => [
-//            //'value' => 10230
-//            'value' => $_GET['var']        
-//        ],
-//        'tipoDato' => [
-//            //'value' => 2
-//            'value' => $_GET['type']
-//        ],
-//        'dataIniziale' => [
-//            //'value' => '2017-01-11'
-//            'value' => $_GET['datefrom']
-//        ],
-//        'dataFinale' => [
-//            //'value' => '2017-01-12'
-//            'value' => $_GET['dateto']
-//        ]
-//    ];
-    
-    $rawParams = [
-        'variabile' => [
-            'param' => 'var', 
-            'bind' => ':variabile',
-            'type' => 'int'
-        ],
-        'tipoDato' => [
-            'param' => 'type',
-            'bind' => ':tipoDato',
-            'type' => 'int'
-        ],
-        'dataIniziale' => [
-            'param' => 'datefrom',
-            'bind' => ':dataIniziale',
-            'type' => 'str'
-        ],
-        'dataFinale' => [
-            'param' => 'dateto',
-            'bind' => ':dataFinale',
-            'type' => 'str'
-        ]
-    ];
     
     foreach ($rawParams as $keyParam => $params) {
         foreach ($params as $key => $value) {
@@ -127,13 +93,38 @@ try {
         }
     }
     
-    //$bindParams = array_merge_recursive($rawParams, $queryParams);
-
-    $pdo = Db::connect($dbName);
-
-    $stmt = Db::query($pdo, $rawQuery, $bindParams);
-
-    $records = Db::fetch($stmt);
+    switch ($crud) {
+        case 'C':
+            $pdo = Db::connect($dbName);
+            $stmt = Db::query($pdo, $rawQuery, $bindParams);
+            $id = $pdo->lastInsertId();
+            $queryParams1 = ['id' => intval($id)];
+            include __DIR__ . '/inc/query/' . $queryTable . '/select_' . $queryTable . '_by_id.php';    
+            foreach ($rawParams as $keyParam => $params) {
+                foreach ($params as $key => $value) {
+                    $bindParams1[$keyParam][$key] = $value;
+                    if ($key === 'param') {
+                        if (array_key_exists($value, $queryParams1)) {
+                            $bindParams1[$keyParam]['value'] = $queryParams1[$value];
+                        } else {
+                            $bindParams1[$keyParam]['value'] = null;
+                        }
+                    }
+                }
+            }
+            $stmt = Db::query($pdo, $rawQuery, $bindParams1);
+            $records = Db::fetch($stmt);
+            break;
+        case 'R':
+            $pdo = Db::connect($dbName);
+            $stmt = Db::query($pdo, $rawQuery, $bindParams);
+            $records = Db::fetch($stmt);
+            break;
+        
+        
+    }
+    
+    
 
     $response = [
         'ok' => true,
@@ -143,9 +134,11 @@ try {
         'base' => $baseRegex,
         'queryType' => $queryFile,
         'queryParams' => $queryParams,
+        'queryParams1' => $queryParams1,
         'db' => $dbName,
         'table' => $queryFile,
         'bindParams' => $bindParams,
+        'bindParams1' => $bindParams1,
         'records' => $records
     ];    
     http_response_code(200);
