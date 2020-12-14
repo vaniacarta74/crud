@@ -54,7 +54,7 @@ try {
     } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'GET') {
         $crud = 'R';
         $queryFile = 'select_' . $queryTable . '_by_id';
-        $queryParams = ['id' => $matches[1]];
+        $queryParams['id'] = $matches[1];
     } elseif (preg_match('/' . $baseRegex  . '$/', $path) && $method == 'POST') {
         $crud = 'C';
         $queryFile = 'insert_' . $queryTable;
@@ -63,15 +63,17 @@ try {
     } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'PUT') {
         $crud = 'U';
         $queryFile = 'update_' . $queryTable;
-        $queryParams = ['id' => $matches[1]];
+        $queryParams = $_GET;
+        $queryParams['id'] = $matches[1];
     } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'PATCH') {
         $crud = 'U';
         $queryFile = 'update_' . $queryTable;
-        $queryParams = ['id' => $matches[1]];
+        $queryParams = $_GET;
+        $queryParams['id'] = $matches[1];
     } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'DELETE') {
         $crud = 'D';
         $queryFile = 'delete_' . $queryTable;
-        $queryParams = ['id' => $matches[1]];
+        $queryParams['id'] = $matches[1];
     } else {
         $crud = 'ND';
         $queryFile = 'NODEF';
@@ -120,12 +122,50 @@ try {
             $stmt = Db::query($pdo, $rawQuery, $bindParams);
             $records = Db::fetch($stmt);
             break;
-        
-        
+        case 'U':
+            $pdo = Db::connect($dbName);            
+            foreach ($bindParams as $keyParam => $params) {
+                if (isset($params['value']) && $params['param'] !== 'id') {
+                    $arrSet[] = substr($params['bind'], 1) . '=' . $params['bind'];
+                }
+            }
+            $replaceStrings[] = implode(',', $arrSet);            
+            $bindQuery = str_replace($tableParams, $replaceStrings, $rawQuery);
+            foreach ($bindParams as $keyParam => $params) {
+                if (isset($params['value'])) {
+                    foreach ($params as $key => $value) {
+                        $bindParams1[$keyParam][$key] = $value;
+                    }
+                }
+            }
+            $stmt = Db::query($pdo, $bindQuery, $bindParams1);
+            $queryParams1 = ['id' => $bindParams1['id']['value']];
+            include __DIR__ . '/inc/query/' . $queryTable . '/select_' . $queryTable . '_by_id.php';    
+            foreach ($rawParams as $keyParam => $params) {
+                foreach ($params as $key => $value) {
+                    $bindParams2[$keyParam][$key] = $value;
+                    if ($key === 'param') {
+                        if (array_key_exists($value, $queryParams1)) {
+                            $bindParams2[$keyParam]['value'] = $queryParams1[$value];
+                        } else {
+                            $bindParams2[$keyParam]['value'] = null;
+                        }
+                    }
+                }
+            }
+            $stmt = Db::query($pdo, $rawQuery, $bindParams2);
+            $records = Db::fetch($stmt);
+            break;
+        case 'D':
+            $pdo = Db::connect($dbName);
+            $stmt = Db::query($pdo, $rawQuery, $bindParams);
+            $records = [
+                'id' => $bindParams['id']['value'],
+                'deleted' => true
+            ];
+            break;
     }
     
-    
-
     $response = [
         'ok' => true,
         'url' => $url,
@@ -139,6 +179,7 @@ try {
         'table' => $queryFile,
         'bindParams' => $bindParams,
         'bindParams1' => $bindParams1,
+        'bindParams2' => $bindParams2,
         'records' => $records
     ];    
     http_response_code(200);

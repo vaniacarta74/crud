@@ -7,12 +7,7 @@
  */
 namespace vaniacarta74\Crud\inc\query;
 
-$rawQuery = "SELECT
-                variabile,
-                valore,
-                CONVERT(varchar, data_e_ora, 20) AS data_e_ora,
-                tipo_dato
-            FROM
+$rawQuery = "DELETE FROM
                 dati_acquisiti
             WHERE
                 id_dato = :id_dato";
