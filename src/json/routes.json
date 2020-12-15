@@ -1,0 +1,37 @@
+{
+    "SSCP_data": {
+        "alias": "sscp",
+        "tables": [
+            "dati_acquisiti",
+            "variabili"
+        ]
+    },
+    "SPT": {
+        "alias": "spt",
+        "tables": [
+            "dati_acquisiti",
+            "variabili"
+        ]
+    },
+    "dbutz": {
+        "alias": "utz",
+        "tables": [
+            "utenti",
+            "utenze"
+        ]
+    },
+    "dbcore": {
+        "alias": "core",
+        "tables": [
+            "scarichi",
+            "formule"
+        ]
+    },
+    "dbumd": {
+        "alias": "umd",
+        "tables": [
+            "richieste",
+            "attivazioni"
+        ]
+    }
+}

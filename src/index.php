@@ -13,81 +13,95 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
 try {
-    $url = $_SERVER['REQUEST_URI'];
-    $method = $_SERVER['REQUEST_METHOD'];
+    $id = isset($_GET['id']) ? '&id=' . $_GET['id'] : null;
+    $taditional = 'src/index.php?db=' . $_GET['db'] . '&table=' . $_GET['table'] . $id . '&';
+    $restful = 'api/' . $_GET['db'] . '/' . $_GET['table'] . (isset($id) ? '/' . $_GET['id'] : null) . '?';
+    $url = str_replace($taditional, $restful, $_SERVER['REQUEST_URI']);
+    $method = 'GET';
+    
+    //$url = $_SERVER['REQUEST_URI'];
+    //$method = $_SERVER['REQUEST_METHOD'];
+    
     $path = strtok($url, '?');
     
-    $db = [
-        'sscp' => 'SSCP_data',
-        'spt' => 'SPT',
-        'utz' => 'dbutz',
-        'core' => 'dbcore',
-        'umd' => 'dbumd'
-    ];
+//    $db = [
+//        'sscp' => 'SSCP_data',
+//        'spt' => 'SPT',
+//        'utz' => 'dbutz',
+//        'core' => 'dbcore',
+//        'umd' => 'dbumd'
+//    ];
+//    
+//    foreach ($db as $alias => $name) {
+//        if (strpos($path, $alias) !== false) {
+//            $dbName = $name;
+//            $dbAlias = $alias;
+//            break;
+//        }
+//    }
+//    
+//    $routes = [
+//        'dati_acquisiti' => 'dati_acquisiti',
+//        'variabili' => 'variabili'
+//    ];
+//    
+//    foreach ($routes as $route => $table) {
+//        if (strpos($path, $route) !== false) {
+//            $queryTable = $table;
+//            $queryRoute = $route;
+//            break;
+//        }
+//    }  
     
-    foreach ($db as $alias => $name) {
-        if (strpos($path, $alias) !== false) {
-            $dbName = $name;
-            $dbAlias = $alias;
-            break;
-        }
-    }
+//    $baseRegex = $dbAlias . '\/' . $queryRoute;
+//    if (preg_match('/' . $baseRegex  . '$/', $path) && $method == 'GET') {
+//        $crud = 'R';
+//        $queryFile = 'select_' . $queryTable;
+//        $queryParams = $_GET;
+//    } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'GET') {
+//        $crud = 'R';
+//        $queryFile = 'select_' . $queryTable . '_by_id';
+//        $queryParams['id'] = $matches[1];
+//    } elseif (preg_match('/' . $baseRegex  . '$/', $path) && $method == 'POST') {
+//        $crud = 'C';
+//        $queryFile = 'insert_' . $queryTable;
+//        $post = file_get_contents('php://input');
+//        $queryParams = json_decode($post, true);
+//    } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'PUT') {
+//        $crud = 'U';
+//        $queryFile = 'update_' . $queryTable;
+//        $queryParams = $_GET;
+//        $queryParams['id'] = $matches[1];
+//    } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'PATCH') {
+//        $crud = 'U';
+//        $queryFile = 'update_' . $queryTable;
+//        $queryParams = $_GET;
+//        $queryParams['id'] = $matches[1];
+//    } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'DELETE') {
+//        $crud = 'D';
+//        $queryFile = 'delete_' . $queryTable;
+//        $queryParams['id'] = $matches[1];
+//    } else {
+//        $crud = 'ND';
+//        $queryFile = 'NODEF';
+//        $queryParams = [];
+//    } 
     
-    $routes = [
-        'dati_acquisiti' => 'dati_acquisiti',
-        'variabili' => 'variabili'
-    ];
-    
-    foreach ($routes as $route => $table) {
-        if (strpos($path, $route) !== false) {
-            $queryTable = $table;
-            $queryRoute = $route;
-            break;
-        }
-    }
-    
-    $baseRegex = $dbAlias . '\/' . $queryRoute;
-    if (preg_match('/' . $baseRegex  . '$/', $path) && $method == 'GET') {
-        $crud = 'R';
-        $queryFile = 'select_' . $queryTable;
-        $queryParams = $_GET;
-    } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'GET') {
-        $crud = 'R';
-        $queryFile = 'select_' . $queryTable . '_by_id';
-        $queryParams['id'] = $matches[1];
-    } elseif (preg_match('/' . $baseRegex  . '$/', $path) && $method == 'POST') {
-        $crud = 'C';
-        $queryFile = 'insert_' . $queryTable;
-        $post = file_get_contents('php://input');
-        $queryParams = json_decode($post, true);
-    } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'PUT') {
-        $crud = 'U';
-        $queryFile = 'update_' . $queryTable;
-        $queryParams = $_GET;
-        $queryParams['id'] = $matches[1];
-    } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'PATCH') {
-        $crud = 'U';
-        $queryFile = 'update_' . $queryTable;
-        $queryParams = $_GET;
-        $queryParams['id'] = $matches[1];
-    } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches) && $method == 'DELETE') {
-        $crud = 'D';
-        $queryFile = 'delete_' . $queryTable;
-        $queryParams['id'] = $matches[1];
-    } else {
-        $crud = 'ND';
-        $queryFile = 'NODEF';
-        $queryParams = [];
-    }   
+    $router = new Router($path, $method);
+    $queryParams = $router->getQueryParams();
+    $urlParams = $router->getUrlParams();
 
-    include __DIR__ . '/inc/query/' . $queryTable . '/' . $queryFile . '.php';
+    $validator = new Validator($queryParams, $urlParams);
+    $rawParams = $validator->getRawParams();
+    
+    //include __DIR__ . '/inc/query/' . $queryTable . '/' . $queryFile . '.php';
     
     foreach ($rawParams as $keyParam => $params) {
         foreach ($params as $key => $value) {
             $bindParams[$keyParam][$key] = $value;
             if ($key === 'param') {
-                if (array_key_exists($value, $queryParams)) {
-                    $bindParams[$keyParam]['value'] = $queryParams[$value];
+                if (array_key_exists($value, $urlParams)) {
+                    $bindParams[$keyParam]['value'] = $urlParams[$value];
                 } else {
                     $bindParams[$keyParam]['value'] = null;
                 }

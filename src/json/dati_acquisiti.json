@@ -1,0 +1,207 @@
+{
+    "select": {
+        "fields": [
+            {
+                "name": "variabile",
+                "alias": null
+            },
+            {
+                "name": "valore",
+                "alias": null
+            },
+            {
+                "name": "CONVERT(varchar, data_e_ora, 20)",
+                "alias": "data_e_ora"
+            },
+            {
+                "name": "tipo_dato",
+                "alias": null
+            }
+        ],
+        "table": "dati_acquisiti",
+        "where": {
+            "and" : [
+                {
+                    "field": "variabile",
+                    "operator": "=",
+                    "value": {
+                        "param": "var",
+                        "bind": ":variabile",
+                        "type": "int"
+                    }
+                },
+                {
+                    "field": "tipo_dato",
+                    "operator": "=",
+                    "value": {
+                        "param": "type",
+                        "bind": ":tipoDato",
+                        "type": "int"
+                    }
+                },
+                {
+                    "field": "data_e_ora",
+                    "operator": ">=",
+                    "value": {
+                        "param": "datefrom",
+                        "bind": ":dataIniziale",
+                        "type": "str"
+                    }
+                },
+                {
+                    "field": "data_e_ora",
+                    "operator": "<",
+                    "value": {
+                        "param": "dateto",
+                        "bind": ":dataFinale",
+                        "type": "str"
+                    }
+                }
+            ]        
+        },
+        "order": [
+            {
+                "field": "data_e_ora",
+                "type": "asc"
+            }
+        ]           
+    },
+    "selectById": {
+        "fields": [
+            {
+                "name": "variabile",
+                "alias": null
+            },
+            {
+                "name": "valore",
+                "alias": null
+            },
+            {
+                "name": "CONVERT(varchar, data_e_ora, 20)",
+                "alias": "data_e_ora"
+            },
+            {
+                "name": "tipo_dato",
+                "alias": null
+            }
+        ],
+        "table": "dati_acquisiti",
+        "where": {
+            "and" : [
+                {
+                    "field": "id_dato",
+                    "operator": "=",
+                    "value": {
+                        "param": "id",
+                        "bind": ":id_dato",
+                        "type": "int"
+                    }
+                }
+            ]        
+        },
+        "order": []           
+    },
+    "insert": {
+        "table": "dati_acquisiti",
+        "values": [
+            {
+                "field": "variabile",
+                "value": {
+                    "param": "var",
+                    "bind": ":variabile",
+                    "type": "int"
+                }
+            },
+            {
+                "field": "tipo_dato",
+                "value": {
+                    "param": "type",
+                    "bind": ":tipoDato",
+                    "type": "int"
+                }
+            },
+            {
+                "field": "data_e_ora",
+                "value": {
+                    "param": "date",
+                    "bind": ":data_e_ora",
+                    "type": "str"
+                }
+            },
+            {
+                "field": "valore",
+                "value": {
+                    "param": "val",
+                    "bind": ":valore",
+                    "type": "int"
+                }
+            }
+        ]      
+    },
+    "update": {
+        "table": "dati_acquisiti",
+        "set": [
+            {
+                "field": "variabile",
+                "value": {
+                    "param": "var",
+                    "bind": ":variabile",
+                    "type": "int"
+                }
+            },
+            {
+                "field": "tipo_dato",
+                "value": {
+                    "param": "type",
+                    "bind": ":tipoDato",
+                    "type": "int"
+                }
+            },
+            {
+                "field": "data_e_ora",
+                "value": {
+                    "param": "date",
+                    "bind": ":data_e_ora",
+                    "type": "str"
+                }
+            },
+            {
+                "field": "valore",
+                "value": {
+                    "param": "val",
+                    "bind": ":valore",
+                    "type": "int"
+                }
+            }
+        ],
+        "where": {
+            "and" : [
+                {
+                    "field": "id_dato",
+                    "operator": "=",
+                    "value": {
+                        "param": "id",
+                        "bind": ":id_dato",
+                        "type": "int"
+                    }
+                }
+            ]        
+        }
+    },
+    "delete": {
+        "table": "dati_acquisiti",
+        "where": {
+            "and" : [
+                {
+                    "field": "id_dato",
+                    "operator": "=",
+                    "value": {
+                        "param": "id",
+                        "bind": ":id_dato",
+                        "type": "int"
+                    }
+                }
+            ]        
+        }        
+    }
+}
