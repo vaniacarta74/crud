@@ -11,5 +11,4 @@ namespace vaniacarta74\Crud\config;
 require_once('php_Router.inc.php');
 
 define('DEBUG_LEVEL', 2);
-define('LOG_PATH', __DIR__ . '/../../log');
-define('ERROR_LOG', 'error.log');
+define('ERROR_LOG', __DIR__ . '/../../log/error.log');

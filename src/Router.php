@@ -65,6 +65,11 @@ class Router
         }
     }
     
+    public function getDb()
+    {
+        return $this->db;
+    }
+    
     private function setTable($path, $routes)
     {
         try {
@@ -88,6 +93,11 @@ class Router
         }
     }
     
+    public function getTable()
+    {
+        return $this->table;
+    }
+    
     private function setId($path)
     {
         try {
@@ -109,8 +119,7 @@ class Router
     {
         return $this->id;
     }
-    
-    
+        
     private function setQueryType($method)
     {
         try {

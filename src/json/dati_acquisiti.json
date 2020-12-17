@@ -27,7 +27,12 @@
                     "value": {
                         "param": "var",
                         "bind": ":variabile",
-                        "type": "int"
+                        "type": "int",
+                        "null": false,
+                        "check": {
+                            "type": "integer",
+                            "params": []
+                        }
                     }
                 },
                 {
@@ -36,7 +41,14 @@
                     "value": {
                         "param": "type",
                         "bind": ":tipoDato",
-                        "type": "int"
+                        "type": "int",
+                        "null": false,
+                        "check": {
+                            "type": "enum",
+                            "params": [
+                                [1,2]
+                            ]
+                        }
                     }
                 },
                 {
@@ -45,7 +57,14 @@
                     "value": {
                         "param": "datefrom",
                         "bind": ":dataIniziale",
-                        "type": "str"
+                        "type": "str",
+                        "null": false,
+                        "check": {
+                            "type": "date",
+                            "params": [
+                                true
+                            ]
+                        }
                     }
                 },
                 {
@@ -54,7 +73,14 @@
                     "value": {
                         "param": "dateto",
                         "bind": ":dataFinale",
-                        "type": "str"
+                        "type": "str",
+                        "null": false,
+                        "check": {
+                            "type": "date",
+                            "params": [
+                                true
+                            ]
+                        }
                     }
                 }
             ]        
@@ -94,7 +120,12 @@
                     "value": {
                         "param": "id",
                         "bind": ":id_dato",
-                        "type": "int"
+                        "type": "int",
+                        "null": false,
+                        "check": {
+                            "type": "integer",
+                            "params": []
+                        }
                     }
                 }
             ]        
@@ -109,7 +140,12 @@
                 "value": {
                     "param": "var",
                     "bind": ":variabile",
-                    "type": "int"
+                    "type": "int",
+                    "null": false,
+                    "check": {
+                        "type": "integer",
+                        "params": []
+                    }
                 }
             },
             {
@@ -117,7 +153,14 @@
                 "value": {
                     "param": "type",
                     "bind": ":tipoDato",
-                    "type": "int"
+                    "type": "int",
+                    "null": false,
+                    "check": {
+                        "type": "enum",
+                        "params": [
+                            [1,2]
+                        ]
+                    }
                 }
             },
             {
@@ -125,7 +168,14 @@
                 "value": {
                     "param": "date",
                     "bind": ":data_e_ora",
-                    "type": "str"
+                    "type": "str",
+                    "null": false,
+                    "check": {
+                        "type": "date",
+                        "params": [
+                            true
+                        ]
+                    }
                 }
             },
             {
@@ -133,7 +183,38 @@
                 "value": {
                     "param": "val",
                     "bind": ":valore",
-                    "type": "int"
+                    "type": "int",
+                    "null": false,
+                    "check": {
+                        "type": "float",
+                        "params": []
+                    }
+                }
+            },
+            {
+                "field": "unita_misura",
+                "value": {
+                    "param": "unit",
+                    "bind": ":unita_misura",
+                    "type": "str",
+                    "null": true,
+                    "check": {
+                        "type": "str",
+                        "params": []
+                    }
+                }
+            },
+            {
+                "field": "impianto",
+                "value": {
+                    "param": "imp",
+                    "bind": ":impianto",
+                    "type": "int",
+                    "null": true,
+                    "check": {
+                        "type": "int",
+                        "params": []
+                    }
                 }
             }
         ]      
@@ -146,7 +227,12 @@
                 "value": {
                     "param": "var",
                     "bind": ":variabile",
-                    "type": "int"
+                    "type": "int",
+                    "null": true,
+                    "check": {
+                        "type": "integer",
+                        "params": []
+                    }
                 }
             },
             {
@@ -154,7 +240,14 @@
                 "value": {
                     "param": "type",
                     "bind": ":tipoDato",
-                    "type": "int"
+                    "type": "int",
+                    "null": true,
+                    "check": {
+                        "type": "enum",
+                        "params": [
+                            [1,2]
+                        ]
+                    }
                 }
             },
             {
@@ -162,7 +255,14 @@
                 "value": {
                     "param": "date",
                     "bind": ":data_e_ora",
-                    "type": "str"
+                    "type": "str",
+                    "null": true,
+                    "check": {
+                        "type": "date",
+                        "params": [
+                            true
+                        ]
+                    }
                 }
             },
             {
@@ -170,7 +270,38 @@
                 "value": {
                     "param": "val",
                     "bind": ":valore",
-                    "type": "int"
+                    "type": "int",
+                    "null": true,
+                    "check": {
+                        "type": "float",
+                        "params": []
+                    }
+                }
+            },
+            {
+                "field": "unita_misura",
+                "value": {
+                    "param": "unit",
+                    "bind": ":unita_misura",
+                    "type": "str",
+                    "null": true,
+                    "check": {
+                        "type": "str",
+                        "params": []
+                    }
+                }
+            },
+            {
+                "field": "impianto",
+                "value": {
+                    "param": "imp",
+                    "bind": ":impianto",
+                    "type": "int",
+                    "null": true,
+                    "check": {
+                        "type": "int",
+                        "params": []
+                    }
                 }
             }
         ],
@@ -182,7 +313,12 @@
                     "value": {
                         "param": "id",
                         "bind": ":id_dato",
-                        "type": "int"
+                        "type": "int",
+                        "null": false,
+                        "check": {
+                            "type": "integer",
+                            "params": []
+                        }
                     }
                 }
             ]        
@@ -198,7 +334,12 @@
                     "value": {
                         "param": "id",
                         "bind": ":id_dato",
-                        "type": "int"
+                        "type": "int",
+                        "null": false,
+                        "check": {
+                            "type": "integer",
+                            "params": []
+                        }
                     }
                 }
             ]        

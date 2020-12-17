@@ -17,7 +17,7 @@ namespace vaniacarta74\Crud;
  */
 class Error
 {
-    public static $logFile = \LOG_PATH . '/' . ERROR_LOG;
+    public static $logFile = ERROR_LOG;
     
     /**
      * Stampa il nome della funzione che ha generato l'errore.
