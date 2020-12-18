@@ -1,6 +1,10 @@
 {
-    "select": {
+    "list": {
         "fields": [
+            {
+                "name": "id_dato",
+                "alias": "id"
+            },
             {
                 "name": "variabile",
                 "alias": null
@@ -92,8 +96,12 @@
             }
         ]           
     },
-    "selectById": {
+    "read": {
         "fields": [
+            {
+                "name": "id_dato",
+                "alias": "id"
+            },
             {
                 "name": "variabile",
                 "alias": null
@@ -132,7 +140,7 @@
         },
         "order": []           
     },
-    "insert": {
+    "create": {
         "table": "dati_acquisiti",
         "values": [
             {

@@ -13,11 +13,11 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
 try {
-//    $id = isset($_GET['id']) ? '&id=' . $_GET['id'] : null;
-//    $taditional = 'src/index.php?db=' . $_GET['db'] . '&table=' . $_GET['table'] . $id . '&';
-//    $restful = 'api/' . $_GET['db'] . '/' . $_GET['table'] . (isset($id) ? '/' . $_GET['id'] : null) . '?';
+//    $varId = isset($_GET['id']) ? '&id=' . $_GET['id'] : null;
+//    $taditional = 'src/index.php?db=' . $_GET['db'] . '&table=' . $_GET['table'] . $varId . '&';
+//    $restful = 'api/' . $_GET['db'] . '/' . $_GET['table'] . (isset($varId) ? '/' . $_GET['id'] : null) . '?';
 //    $url = str_replace($taditional, $restful, $_SERVER['REQUEST_URI']);
-//    $method = 'DELETE';
+//    $method = 'GET';
     
     $url = $_SERVER['REQUEST_URI'];
     $method = $_SERVER['REQUEST_METHOD'];
@@ -26,7 +26,8 @@ try {
     
     $router = new Router($path, $method);
     $dbName = $router->getDb();
-    $dbId = $router->getId();
+    $resource = $router->getResource();
+    $id = $router->getId();
     $queryType = $router->getQueryType();
     $queryParams = $router->getQueryParams();
     $urlParams = $router->getUrlParams();
@@ -39,7 +40,7 @@ try {
     $prepStmt = Db::prepare($pdo, $purgedQuery);
     $queryStmt = Db::query($prepStmt, $validParams);
     
-    $responder = new Responder($queryType, $dbId, $pdo, $queryStmt);
+    $responder = new Responder($queryType, $resource, $id, $pdo, $queryStmt);
     $response = $responder->getResponse();
     
     http_response_code(200);

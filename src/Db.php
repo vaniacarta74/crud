@@ -51,8 +51,7 @@ class Db
     {
         try {
             $type = $queryParams['type'];
-            $genType = ($type === 'selectById') ? 'select' : $type;
-            $functionName = 'Db::prepare' . ucfirst($genType);
+            $functionName = 'Db::prepare' . ucfirst($type);
             $rawQuery = Utility::callback($functionName, array($queryParams));
             $stmt = $pdo->prepare($rawQuery);
             
@@ -63,7 +62,24 @@ class Db
         }
     }
     
-    public static function prepareSelect($queryParams)
+    public static function prepareList($queryParams)
+    {
+        try {
+            $fields = self::setSelectFields($queryParams['fields']);
+            $table = self::setTable($queryParams['table']);
+            $where = self::setWhere($queryParams['where']);
+            $order = self::setOrder($queryParams['order']);
+            
+            $rawQuery = 'SELECT ' . $fields . ' FROM ' . $table . (isset($where) ? ' WHERE ' . $where : null) . (isset($order) ? ' ORDER BY ' . $order : null) . ';';
+            
+            return $rawQuery;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    public static function prepareRead($queryParams)
     {
         try {
             $fields = self::setSelectFields($queryParams['fields']);
@@ -166,7 +182,7 @@ class Db
         }
     }
     
-    public static function prepareInsert($queryParams)
+    public static function prepareCreate($queryParams)
     {
         try {
             $table = self::setTable($queryParams['table']);

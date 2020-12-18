@@ -20,6 +20,7 @@ class Router
     private $db;
     private $alias;
     private $table;
+    private $resource;
     private $id;
     private $queryType;
     private $queryParams;
@@ -32,6 +33,7 @@ class Router
             $routes = json_decode($strJson, true);
             $dbOk = $this->setDb($path, $routes);
             $tableOk = $this->setTable($path, $routes);
+            $this->setResource();
             $this->setId($path);
             $this->setQueryType($method);
             $this->setQueryParams();
@@ -98,6 +100,26 @@ class Router
         return $this->table;
     }
     
+    private function setResource()
+    {
+        try {
+            if (isset($this->alias) && isset($this->table)) {
+                $resource = '/' . $this->alias . '/' . $this->table;
+            } else {
+                throw new \Exception('Risorsa non definibile.');
+            }
+            $this->resource = $resource;        
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    public function getResource()
+    {
+        return $this->resource;
+    }
+    
     private function setId($path)
     {
         try {
@@ -127,7 +149,7 @@ class Router
             if (isset($this->id)) {
                 switch ($method) {
                     case 'GET':
-                        $queryType = 'selectById';
+                        $queryType = 'read';
                         break;
                     case 'PUT':
                     case 'PATCH':
@@ -140,10 +162,10 @@ class Router
             } else {
                 switch ($method) {
                     case 'GET':
-                        $queryType = 'select';
+                        $queryType = 'list';
                         break;
                     case 'POST':
-                        $queryType = 'insert';
+                        $queryType = 'create';
                         break;
                 }
             }
@@ -188,14 +210,14 @@ class Router
         try {
             $urlParams = [];
             switch ($this->queryType) {
-                case 'select':
+                case 'list':
                     $urlParams = $_GET;
                     break;
-                case 'selectById':
+                case 'read':
                 case 'delete':
                     $urlParams['id'] = $this->id;
                     break;
-                case 'insert':
+                case 'create':
                     $post = @file_get_contents('php://input');
                     $urlParams = json_decode($post, true);
                     //$urlParams = $_GET;

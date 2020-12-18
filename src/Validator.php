@@ -43,8 +43,7 @@ class Validator
     {
         try {
             $type = $queryParams['type'];
-            $genType = ($type === 'selectById') ? 'select' : $type;
-            $functionName = 'Validator::get' . ucfirst($genType) . 'Params';
+            $functionName = 'Validator::get' . ucfirst($type) . 'Params';
             $this->rawParams = Utility::callback($functionName, array($queryParams));
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
@@ -77,7 +76,7 @@ class Validator
         }        
     }
     
-    public static function getSelectParams($queryParams) 
+    public static function getListParams($queryParams) 
     {
         try {
             $params = $queryParams['where'];
@@ -91,7 +90,21 @@ class Validator
         }        
     }
     
-    public static function getInsertParams($queryParams) 
+    public static function getReadParams($queryParams) 
+    {
+        try {
+            $params = $queryParams['where'];
+            $rawParams = [];
+            self::goWhereDeep($rawParams, $params);
+            
+            return $rawParams;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }        
+    }
+    
+    public static function getCreateParams($queryParams) 
     {
         try {
             $params = $queryParams['values'];
@@ -211,7 +224,7 @@ class Validator
         try {
             $type = $queryParams['type'];
             switch ($type) {
-                case 'insert':
+                case 'create':
                     $this->purgedQuery = $this->purgeType('values', $queryParams);
                     break;
                 case 'update':
