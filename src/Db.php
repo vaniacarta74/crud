@@ -18,57 +18,101 @@ use vaniacarta74\Crud\Utility;
  */
 class Db
 {
-    private static $driver = 'dblib';
-    private static $host = MSSQL_HOST;
-    private static $user = MSSQL_USER;
-    private static $password = MSSQL_PASSWORD;
+    private $db;
+    private $driver;
+    private $host;
+    private $user;
+    private $password;
+    private $dsn;
+    private $pdo;
+    private $pdoStmt;
+    private $queryType;
     
-    public static function connect($db, $driver = null, $host = null, $user = null, $password = null)
+    public function __construct($db, $driver = null, $host = null, $user = null, $password = null) {
+        try {
+            $this->db = $db;
+            $this->driver = isset($driver) ? $driver : 'dblib';
+            $this->host = isset($host) ? $host : MSSQL_HOST;
+            $this->user = isset($user) ? $user : MSSQL_USER;
+            $this->password = isset($password) ? $password : MSSQL_PASSWORD;
+            $this->dsn = $this->driver . ':host=' . $this->host . ';dbname=' . $this->db;
+        } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    public function run($queryParams, $bindParams)
     {
         try {
+            $this->connect();
+            $this->prepare($queryParams);            
+            $this->query($bindParams);
+            return $this->getResults();
+        } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }   
+    
+    public function connect()
+    {
+        try {
+            $n = 5;
+            $delay = 500000;
             $params = [
-                'db' => $db,
-                'driver' => isset($driver) ? $driver : self::$driver,
-                'host' => isset($host) ? $host : self::$host,
-                'user' => isset($user) ? $user : self::$user,
-                'password' => isset($password) ? $password : self::$password
+                'db' => $this->db,
+                'driver' => $this->driver,
+                'host' => $this->host,
+                'user' => $this->user,
+                'password' => $this->password
             ];
             $key = md5(serialize($params));    
-            $dsn = $params['driver'] . ':host=' . $params['host'] . ';dbname=' . $params['db'];
             if (!array_key_exists($key, $GLOBALS) || !($GLOBALS[$key] instanceof \PDO)) {
-                $pdo = new \PDO($dsn, $params['user'], $params['password']);
-                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-                $GLOBALS[$key] = $pdo;
+                $isOk = false;
+                for ($i = 1; $i <= $n; $i++) {
+                    try {
+                        $pdo = new \PDO($this->dsn, $this->user, $this->password);
+                        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                        $GLOBALS[$key] = $pdo;
+                        $isOk = true;
+                        break;
+                    } catch (\PDOException $e) {
+                        usleep($delay);
+                        continue;
+                    }
+                }
+                if (!$isOk) {
+                    throw new \PDOException('Impossibile stabilire la seguente connessione: dsn = ' . $this->dsn);
+                }
             }
-            return $GLOBALS[$key];
+            $this->pdo = $GLOBALS[$key];
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
     }
     
-    public static function prepare($pdo, $queryParams)
+    public function prepare($queryParams)
     {
         try {
-            $type = $queryParams['type'];
-            $functionName = 'Db::prepare' . ucfirst($type);
-            $rawQuery = Utility::callback($functionName, array($queryParams));
-            $stmt = $pdo->prepare($rawQuery);
-            
-            return $stmt;
+            $this->queryType = $queryParams['type'];
+            $method = 'prepare' . ucfirst($this->queryType);
+            $rawQuery = $this->$method($queryParams);
+            $this->pdoStmt = $this->pdo->prepare($rawQuery);
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
     }
     
-    public static function prepareList($queryParams)
+    private function prepareList($queryParams)
     {
         try {
-            $fields = self::setSelectFields($queryParams['fields']);
-            $table = self::setTable($queryParams['table']);
-            $where = self::setWhere($queryParams['where']);
-            $order = self::setOrder($queryParams['order']);
+            $fields = $this->setSelectFields($queryParams['fields']);
+            $table = $this->setTable($queryParams['table']);
+            $where = $this->setWhere($queryParams['where']);
+            $order = $this->setOrder($queryParams['order']);
             
             $rawQuery = 'SELECT ' . $fields . ' FROM ' . $table . (isset($where) ? ' WHERE ' . $where : null) . (isset($order) ? ' ORDER BY ' . $order : null) . ';';
             
@@ -79,13 +123,13 @@ class Db
         }
     }
     
-    public static function prepareRead($queryParams)
+    private function prepareRead($queryParams)
     {
         try {
-            $fields = self::setSelectFields($queryParams['fields']);
-            $table = self::setTable($queryParams['table']);
-            $where = self::setWhere($queryParams['where']);
-            $order = self::setOrder($queryParams['order']);
+            $fields = $this->setSelectFields($queryParams['fields']);
+            $table = $this->setTable($queryParams['table']);
+            $where = $this->setWhere($queryParams['where']);
+            $order = $this->setOrder($queryParams['order']);
             
             $rawQuery = 'SELECT ' . $fields . ' FROM ' . $table . (isset($where) ? ' WHERE ' . $where : null) . (isset($order) ? ' ORDER BY ' . $order : null) . ';';
             
@@ -96,7 +140,7 @@ class Db
         }
     }
     
-    public static function setSelectFields($arrFields)
+    private function setSelectFields($arrFields)
     {
         try {
             $strFields = [];
@@ -119,7 +163,7 @@ class Db
         }
     }
     
-    public static function setTable($table)
+    private function setTable($table)
     {
         try {            
             return $table;
@@ -129,12 +173,12 @@ class Db
         }
     }
     
-    public static function setWhere($arrWhere)
+    private function setWhere($arrWhere)
     {
         try {
             $keys = array_keys($arrWhere);
             $opAndOr = strtoupper($keys[0]); 
-            $subExp = self::setWhereRecursive($arrWhere);
+            $subExp = $this->setWhereRecursive($arrWhere);
             $where = implode(' ' . $opAndOr . ' ', $subExp);
             
             return $where;
@@ -144,7 +188,7 @@ class Db
         }
     }
     
-    public static function setWhereRecursive($params) 
+    private function setWhereRecursive($params) 
     {
         try {
             foreach ($params as $key => $param) {
@@ -163,7 +207,7 @@ class Db
         }        
     }
     
-    public static function setOrder($arrOrders)
+    private function setOrder($arrOrders)
     {
         try {
             $strOrders = [];
@@ -182,12 +226,12 @@ class Db
         }
     }
     
-    public static function prepareCreate($queryParams)
+    private function prepareCreate($queryParams)
     {
         try {
-            $table = self::setTable($queryParams['table']);
-            $fields = self::setInsertFields($queryParams['values']);
-            $values = self::setValues($queryParams['values']);
+            $table = $this->setTable($queryParams['table']);
+            $fields = $this->setInsertFields($queryParams['values']);
+            $values = $this->setValues($queryParams['values']);
             
             $rawQuery = 'INSERT INTO ' . $table . ' (' . $fields . ') VALUES (' . $values . ');';
             
@@ -198,7 +242,7 @@ class Db
         }
     }
     
-    public static function setInsertFields($arrValues)
+    private function setInsertFields($arrValues)
     {
         try {
             $strFields = [];
@@ -213,7 +257,7 @@ class Db
         }
     }
     
-    public static function setValues($arrValues)
+    private function setValues($arrValues)
     {
         try {
             $strValues = [];
@@ -228,12 +272,12 @@ class Db
         }
     }
     
-    public static function prepareUpdate($queryParams)
+    private function prepareUpdate($queryParams)
     {
         try {
-            $table = self::setTable($queryParams['table']);
-            $sets = self::setSets($queryParams['set']);
-            $where = self::setWhere($queryParams['where']);
+            $table = $this->setTable($queryParams['table']);
+            $sets = $this->setSets($queryParams['set']);
+            $where = $this->setWhere($queryParams['where']);
             
             $rawQuery = 'UPDATE ' . $table . ' SET ' . $sets . ' WHERE ' . $where . ';';
             
@@ -244,7 +288,7 @@ class Db
         }
     }
     
-    public static function setSets($arrSets)
+    private function setSets($arrSets)
     {
         try {
             $strSets = [];
@@ -259,11 +303,11 @@ class Db
         }
     }
     
-    public static function prepareDelete($queryParams)
+    private function prepareDelete($queryParams)
     {
         try {
-            $table = self::setTable($queryParams['table']);
-            $where = self::setWhere($queryParams['where']);
+            $table = $this->setTable($queryParams['table']);
+            $where = $this->setWhere($queryParams['where']);
             
             $rawQuery = 'DELETE FROM ' . $table . ' WHERE ' . $where . ';';
             
@@ -274,24 +318,21 @@ class Db
         }
     }
     
-    //public static function query($pdo, $rawQuery, $bindParams)
-    public static function query($stmt, $bindParams)
+    public function query($bindParams)
     {
         try {
-            //$stmt = $pdo->prepare($rawQuery);
             foreach ($bindParams as $param) {
                 $type = constant('\PDO::PARAM_' . strtoupper($param['type']));
-                $stmt->bindParam($param['bind'], $param['value'], $type);
+                $this->pdoStmt->bindParam($param['bind'], $param['value'], $type);
             }
-            $stmt->execute();
-            return $stmt;
+            $this->pdoStmt->execute();
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
     }
     
-    public static function fetch($stmt, $style = null)
+    public function fetch($stmt, $style = null)
     {
         try {
             $pdoStyle = isset($style) ? $style : \PDO::FETCH_ASSOC;
@@ -299,6 +340,27 @@ class Db
                 $records[] = $row;
             }            
             return $records;
+        } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    private function getResults()
+    {
+        try {
+            $response['type'] = $this->queryType;
+            if ($this->queryType === 'list' || $this->queryType === 'read') {
+                $response['id'] = null;
+                $response['records'] = $this->fetch($this->pdoStmt);;
+            } elseif ($this->queryType === 'create') {
+                $response['id'] = $this->pdo->lastInsertId();
+                $response['records'] = null;
+            } else {
+                $response['id'] = null;
+                $response['records'] = null;
+            }
+            return $response;
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;

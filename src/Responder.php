@@ -17,20 +17,20 @@ use vaniacarta74\Crud\Db;
  */
 class Responder
 {
-    private $lcrud;
+    private $type;
     private $id;
     private $records;
     private $count;
     private $resource;
     private $response;
-    
-    public function __construct($lcrud, $resource, $id, $pdo, $stmt)
+        
+    public function __construct($resource, $id, $results)
     {
         try {
-            $this->lcrud = $lcrud;
-            $this->resource = $resource;
-            $this->setId($id, $pdo);
-            $this->setRecords($stmt);
+            $this->setResource($resource);
+            $this->setType($results);            
+            $this->setId($id, $results);
+            $this->setRecords($results);
             $this->setCount();
             $this->addLinks();
             $this->setResponse();
@@ -40,18 +40,18 @@ class Responder
             throw $e;
         }
     }
-    
-    private function setId($id, $pdo)
+        
+    private function setId($id, $results)
     {
         try {
-            switch ($this->lcrud) {
+            switch ($this->type) {
                 case 'read':
                 case 'update':
                 case 'delete':
                     $this->id = $id;
                     break;
                 case 'create':
-                    $this->id = $pdo->lastInsertId();
+                    $this->id = $results['id'];
                     break;
                 case 'list':
                     $this->id = null;
@@ -61,18 +61,33 @@ class Responder
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
-    } 
+    }
     
-    private function setRecords($stmt) 
+    private function setRecords($results) 
     {
-        try {
-            if ($this->lcrud === 'list' || $this->lcrud === 'read') {
-                $records = DB::fetch($stmt);
-            } else {
-                $records = null;
-            }
-            $this->records = $records;           
-        } catch (\PDOException $e) {
+        try {            
+            $this->records = $results['records'];           
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    private function setType($results) 
+    {
+        try {            
+            $this->type = $results['type'];           
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    private function setResource($resource) 
+    {
+        try {            
+            $this->resource = $resource;           
+        } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
@@ -119,12 +134,12 @@ class Responder
         }
     }
     
-    private function setResponse($stmt)
+    private function setResponse()
     {
         try {
             $response['ok'] = true;
-            $response['method'] = $this->lcrud;            
-            switch ($this->lcrud) {                
+            $response['method'] = $this->type;            
+            switch ($this->type) {                
                 case 'update':
                     $response['response']['message'] = 'Record ' . $this->id . ' aggiornato con successo';
                     $response['response']['link'] = $this->setLink($this->id);

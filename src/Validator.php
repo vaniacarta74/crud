@@ -10,7 +10,6 @@ namespace vaniacarta74\Crud;
 
 use vaniacarta74\Crud\Error;
 use vaniacarta74\Crud\Utility;
-use vaniacarta74\Crud\Check;
 
 /**
  * Description of Validator
@@ -43,8 +42,8 @@ class Validator
     {
         try {
             $type = $queryParams['type'];
-            $functionName = 'Validator::get' . ucfirst($type) . 'Params';
-            $this->rawParams = Utility::callback($functionName, array($queryParams));
+            $method = 'get' . ucfirst($type) . 'Params';
+            $this->rawParams = $this->$method($queryParams);
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
@@ -56,12 +55,12 @@ class Validator
         return $this->rawParams;
     }
     
-    public static function goWhereDeep(&$rawParams, $params) 
+    private function goWhereDeep(&$rawParams, $params) 
     {
         try {
             foreach ($params as $key => $param) {
                 if ($key === 'and' || $key === 'or') {
-                    self::goWhereDeep($rawParams, $param);
+                    $this->goWhereDeep($rawParams, $param);
                 } else {
                     foreach ($param as $keyProperty => $property) {
                         if ($keyProperty === 'value') {
@@ -76,12 +75,12 @@ class Validator
         }        
     }
     
-    public static function getListParams($queryParams) 
+    private function getListParams($queryParams) 
     {
         try {
             $params = $queryParams['where'];
             $rawParams = [];
-            self::goWhereDeep($rawParams, $params);
+            $this->goWhereDeep($rawParams, $params);
             
             return $rawParams;
         } catch (\Exception $e) {
@@ -90,12 +89,12 @@ class Validator
         }        
     }
     
-    public static function getReadParams($queryParams) 
+    private function getReadParams($queryParams) 
     {
         try {
             $params = $queryParams['where'];
             $rawParams = [];
-            self::goWhereDeep($rawParams, $params);
+            $this->goWhereDeep($rawParams, $params);
             
             return $rawParams;
         } catch (\Exception $e) {
@@ -104,7 +103,7 @@ class Validator
         }        
     }
     
-    public static function getCreateParams($queryParams) 
+    private function getCreateParams($queryParams) 
     {
         try {
             $params = $queryParams['values'];
@@ -123,7 +122,7 @@ class Validator
         }        
     }
     
-    public static function getUpdateParams($queryParams) 
+    private function getUpdateParams($queryParams) 
     {
         try {
             $rawParams = [];            
@@ -136,7 +135,7 @@ class Validator
                 }
             }
             $whereParams = $queryParams['where'];
-            self::goWhereDeep($rawParams, $whereParams);
+            $this->goWhereDeep($rawParams, $whereParams);
             return $rawParams;
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
@@ -144,12 +143,12 @@ class Validator
         }        
     }
     
-    public static function getDeleteParams($queryParams) 
+    private function getDeleteParams($queryParams) 
     {
         try {
             $params = $queryParams['where'];
             $rawParams = [];
-            self::goWhereDeep($rawParams, $params);
+            $this->goWhereDeep($rawParams, $params);
             
             return $rawParams;
         } catch (\Exception $e) {
@@ -197,9 +196,9 @@ class Validator
                     foreach ($properties as $key => $value) {
                         $validParams[$keyParam][$key] = $value;
                         if ($key === 'check') {
-                            $functionName = 'Check::is' . ucfirst($value['type']);
-                            $functionParams = array_merge(array($properties['value']), $value['params']);
-                            if (!Utility::callback($functionName, $functionParams)) {
+                            $method = array('Check', 'is' . ucfirst($value['type']));
+                            $methodParams = array_merge(array($properties['value']), $value['params']);
+                            if (!Utility::callback($method, $methodParams)) {
                                 throw new \Exception('Formato parametro ' . $properties['param'] . ' non valido');
                             };
                             $this->binders[] = $properties['bind'];

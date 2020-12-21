@@ -65,19 +65,27 @@ class Utility
      * @param string $strDateTime Data nel formato "YYYY-mm-dd HH:ii:ss.millisec"
      * @return string Intervallo intercorso nel formato "secondi,millisecondi"
      */
-    public static function callback($functionName, $params)
+    public static function callback($arrCall, $params)
     {
         try {
-            $function = __NAMESPACE__ . '\\' . $functionName;
-            if (is_callable($function)) {
-                $result = call_user_func_array($function, $params);
+            if (count($arrCall) > 1) {
+                if (is_object($arrCall[0]) || class_exists($arrCall[0])) {
+                    $callable = $arrCall;
+                } else {
+                    $callable = array(__NAMESPACE__ . '\\' . $arrCall[0], $arrCall[1]);
+                }
             } else {
-                throw new \Exception('Funzione inesistente');
+                $callable = __NAMESPACE__ . '\\' . $arrCall[0];
+            }
+            if (is_callable($callable)) {
+                $result = call_user_func_array($callable, $params);
+            } else {
+                throw new \Exception('Funzione o methodo non eseguibile');
             }        
             return $result;
         } catch (\Throwable $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
-    }   
+    }
 }
