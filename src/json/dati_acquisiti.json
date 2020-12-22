@@ -3,23 +3,28 @@
         "fields": [
             {
                 "name": "id_dato",
-                "alias": "id"
+                "alias": "id",
+                "type": "integer"
             },
             {
                 "name": "variabile",
-                "alias": null
+                "alias": null,
+                "type": "integer"
             },
             {
                 "name": "valore",
-                "alias": null
+                "alias": null,
+                "type": "float"
             },
             {
                 "name": "CONVERT(varchar, data_e_ora, 20)",
-                "alias": "data_e_ora"
+                "alias": "data_e_ora",
+                "type": "dateTime"
             },
             {
                 "name": "tipo_dato",
-                "alias": null
+                "alias": null,
+                "type": "integer"
             }
         ],
         "table": "dati_acquisiti",
@@ -64,7 +69,7 @@
                         "type": "str",
                         "null": false,
                         "check": {
-                            "type": "date",
+                            "type": "dateTime",
                             "params": [
                                 true
                             ]
@@ -80,7 +85,7 @@
                         "type": "str",
                         "null": false,
                         "check": {
-                            "type": "date",
+                            "type": "dateTime",
                             "params": [
                                 true
                             ]
@@ -100,23 +105,28 @@
         "fields": [
             {
                 "name": "id_dato",
-                "alias": "id"
+                "alias": "id",
+                "type": "integer"
             },
             {
                 "name": "variabile",
-                "alias": null
+                "alias": null,
+                "type": "integer"
             },
             {
                 "name": "valore",
-                "alias": null
+                "alias": null,
+                "type": "float"
             },
             {
                 "name": "CONVERT(varchar, data_e_ora, 20)",
-                "alias": "data_e_ora"
+                "alias": "data_e_ora",
+                "type": "dateTme"
             },
             {
                 "name": "tipo_dato",
-                "alias": null
+                "alias": null,
+                "type": "integer"
             }
         ],
         "table": "dati_acquisiti",
@@ -179,7 +189,7 @@
                     "type": "str",
                     "null": false,
                     "check": {
-                        "type": "date",
+                        "type": "dateTime",
                         "params": [
                             true
                         ]
@@ -266,7 +276,7 @@
                     "type": "str",
                     "null": true,
                     "check": {
-                        "type": "date",
+                        "type": "dateTime",
                         "params": [
                             true
                         ]

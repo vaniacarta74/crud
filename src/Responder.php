@@ -24,12 +24,12 @@ class Responder
     private $resource;
     private $response;
         
-    public function __construct($resource, $id, $results)
+    public function __construct($resource, $results)
     {
         try {
             $this->setResource($resource);
             $this->setType($results);            
-            $this->setId($id, $results);
+            $this->setId($results);
             $this->setRecords($results);
             $this->setCount();
             $this->addLinks();
@@ -41,22 +41,10 @@ class Responder
         }
     }
         
-    private function setId($id, $results)
+    private function setId($results)
     {
         try {
-            switch ($this->type) {
-                case 'read':
-                case 'update':
-                case 'delete':
-                    $this->id = $id;
-                    break;
-                case 'create':
-                    $this->id = $results['id'];
-                    break;
-                case 'list':
-                    $this->id = null;
-                    break;
-            }
+            $this->id = isset($results['id']) ? $results['id'] : null;
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;

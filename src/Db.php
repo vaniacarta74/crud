@@ -27,6 +27,8 @@ class Db
     private $pdo;
     private $pdoStmt;
     private $queryType;
+    private $query;
+    private $id;
     
     public function __construct($db, $driver = null, $host = null, $user = null, $password = null) {
         try {
@@ -46,14 +48,31 @@ class Db
     {
         try {
             $this->connect();
-            $this->prepare($queryParams);            
-            $this->query($bindParams);
+            $this->assemble($queryParams);
+            $this->prepare();
+            $this->setId($bindParams);
+            $this->bind($bindParams);
+            $this->exec();
             return $this->getResults();
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
-    }   
+    }
+    
+    public function go($query, $queryType = null)
+    {
+        try {
+            $this->queryType = isset($queryType) ? $queryType : 'list';
+            $this->query = $query;
+            $this->connect();
+            $this->query();
+            return $this->getResults();
+        } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
     
     public function connect()
     {
@@ -93,13 +112,23 @@ class Db
         }
     }
     
-    public function prepare($queryParams)
+    public function assemble($queryParams)
     {
         try {
             $this->queryType = $queryParams['type'];
             $method = 'prepare' . ucfirst($this->queryType);
             $rawQuery = $this->$method($queryParams);
-            $this->pdoStmt = $this->pdo->prepare($rawQuery);
+            $this->query = $rawQuery;
+        } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    public function prepare()
+    {
+        try {            
+            $this->pdoStmt = $this->pdo->prepare($this->query);
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
@@ -318,13 +347,9 @@ class Db
         }
     }
     
-    public function query($bindParams)
+    public function exec()
     {
         try {
-            foreach ($bindParams as $param) {
-                $type = constant('\PDO::PARAM_' . strtoupper($param['type']));
-                $this->pdoStmt->bindParam($param['bind'], $param['value'], $type);
-            }
             $this->pdoStmt->execute();
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
@@ -332,11 +357,49 @@ class Db
         }
     }
     
-    public function fetch($stmt, $style = null)
+    public function bind($bindParams)
+    {
+        try {
+            foreach ($bindParams as $param) {
+                $type = constant('\PDO::PARAM_' . strtoupper($param['type']));
+                $this->pdoStmt->bindParam($param['bind'], $param['value'], $type);
+            }
+        } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    public function setId($bindParams)
+    {
+        try {
+            foreach ($bindParams as $param) {
+                if ($param['param'] === 'id') {
+                    $this->id = $param['value'];
+                    break;
+                }
+            }
+        } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    public function query()
+    {
+        try {
+            $this->pdoStmt = $this->pdo->query($this->query);
+        } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    public function fetch($style = null)
     {
         try {
             $pdoStyle = isset($style) ? $style : \PDO::FETCH_ASSOC;
-            while ($row = $stmt->fetch($pdoStyle)) {
+            while ($row = $this->pdoStmt->fetch($pdoStyle)) {
                 $records[] = $row;
             }            
             return $records;
@@ -351,15 +414,14 @@ class Db
         try {
             $response['type'] = $this->queryType;
             if ($this->queryType === 'list' || $this->queryType === 'read') {
-                $response['id'] = null;
-                $response['records'] = $this->fetch($this->pdoStmt);;
+                $response['records'] = $this->fetch();
             } elseif ($this->queryType === 'create') {
-                $response['id'] = $this->pdo->lastInsertId();
+                $this->id = $this->pdo->lastInsertId();
                 $response['records'] = null;
             } else {
-                $response['id'] = null;
                 $response['records'] = null;
             }
+            $response['id'] = isset($this->id) ? $this->id : null;
             return $response;
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());

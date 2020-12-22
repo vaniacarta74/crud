@@ -27,7 +27,6 @@ try {
     $router = new Router($path, $method);
     $dbName = $router->getDb();
     $resource = $router->getResource();
-    $id = $router->getId();
     $queryParams = $router->getQueryParams();
     $urlParams = $router->getUrlParams();
 
@@ -35,10 +34,9 @@ try {
     $purgedQuery = $validator->getPurgedQuery();
     $validParams = $validator->getValidParams();
     
-    $db = new Db($dbName);
-    $results = $db->run($purgedQuery, $validParams);
+    $results = DbWrapper::dateTime($dbName, $purgedQuery, $validParams);
     
-    $responder = new Responder($resource, $id, $results);
+    $responder = new Responder($resource, $results);
     $response = $responder->getResponse();
     
     http_response_code(200);
