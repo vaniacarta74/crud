@@ -26,7 +26,8 @@
             "src/config/config.php"            
         ],
         "psr-4": {
-            "vaniacarta74\\Crud\\": "src/" 
+            "vaniacarta74\\Crud\\": "src/",
+            "vaniacarta74\\Crud\\tests\\": "tests/"
         }
     },
     "autoload-dev": {

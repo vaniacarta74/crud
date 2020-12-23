@@ -13,14 +13,14 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
 try {
-    $varId = isset($_GET['id']) ? '&id=' . $_GET['id'] : null;
-    $taditional = 'src/index.php?db=' . $_GET['db'] . '&table=' . $_GET['table'] . $varId . '&';
-    $restful = 'api/' . $_GET['db'] . '/' . $_GET['table'] . (isset($varId) ? '/' . $_GET['id'] : null) . '?';
-    $url = str_replace($taditional, $restful, $_SERVER['REQUEST_URI']);
-    $method = 'GET';
+//    $varId = isset($_GET['id']) ? '&id=' . $_GET['id'] : null;
+//    $taditional = 'src/index.php?db=' . $_GET['db'] . '&table=' . $_GET['table'] . $varId . '&';
+//    $restful = 'api/' . $_GET['db'] . '/' . $_GET['table'] . (isset($varId) ? '/' . $_GET['id'] : null) . '?';
+//    $url = str_replace($taditional, $restful, $_SERVER['REQUEST_URI']);
+//    $method = 'GET';
     
-//    $url = $_SERVER['REQUEST_URI'];
-//    $method = $_SERVER['REQUEST_METHOD'];
+    $url = $_SERVER['REQUEST_URI'];
+    $method = $_SERVER['REQUEST_METHOD'];
     
     $path = strtok($url, '?');
     

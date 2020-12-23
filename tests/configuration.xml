@@ -20,14 +20,14 @@
         <whitelist>
             <directory suffix=".php">../src/</directory>
             <exclude>
-                <file>../src/index.php</file>                
+                <!--<file>../src/index2.php</file>-->
             </exclude>
         </whitelist>
     </filter>
     
     <groups>
         <exclude>
-            <group>mains</group>
+            <!--<group>mains</group>-->
         </exclude>    
     </groups>
 

@@ -38,18 +38,15 @@ class DbWrapper
     {
         try {
             $changed = [];
-            if (in_array($dbName, self::$dbToWrap)) {
-                foreach ($params as $nParam => $param) {
-                    foreach ($param as $key => $value) {
-                        if ($key === 'value' && $param['check']['type'] === 'dateTime') {
-                            $changed[$nParam][$key] = self::setDateTime('Y-m-d H:i:s', $value, 'Europe/Rome', 'Etc/GMT-1');
-                        } else {
-                            $changed[$nParam][$key] = $value;
-                        }
+            $isTimeZoned = in_array($dbName, self::$dbToWrap);
+            foreach ($params as $nParam => $param) {
+                foreach ($param as $key => $value) {
+                    if ($key === 'value' && $param['check']['type'] === 'dateTime') {
+                        $changed[$nParam][$key] = self::setDateTime('Y-m-d H:i:s', $value, $isTimeZoned, 'Europe/Rome', 'Etc/GMT-1');
+                    } else {
+                        $changed[$nParam][$key] = $value;
                     }
                 }
-            } else {
-                $changed = $params;
             }
             return $changed;
         } catch (\Exception $e) {
@@ -58,15 +55,18 @@ class DbWrapper
         }
     }
     
-    public static function setDateTime($format, $oldDateTime, $timeZoneIn, $timeZoneOut)
+    public static function setDateTime($format, $oldDateTime, $isTimeZoned, $timeZoneIn, $timeZoneOut)
     {
-        try {
-                        
+        try {                        
             $dateTime = self::formatDateTime($oldDateTime);
-            $dateTimeZoneIn = new \DateTimeZone($timeZoneIn);
-            $dateTimeZoneOut = new \DateTimeZone($timeZoneOut);
-            $newDateTime = \DateTime::createFromFormat($dateTime['format'], $dateTime['value'], $dateTimeZoneIn);
-            $newDateTime->setTimezone($dateTimeZoneOut);
+            if ($isTimeZoned) {
+                $dateTimeZoneIn = new \DateTimeZone($timeZoneIn);
+                $dateTimeZoneOut = new \DateTimeZone($timeZoneOut);
+                $newDateTime = \DateTime::createFromFormat($dateTime['format'], $dateTime['value'], $dateTimeZoneIn);
+                $newDateTime->setTimezone($dateTimeZoneOut);
+            } else {
+                $newDateTime = \DateTime::createFromFormat($dateTime['format'], $dateTime['value']);
+            }
             $newValue = $newDateTime->format($format);
             return $newValue;
         } catch (\Exception $e) {
@@ -118,12 +118,9 @@ class DbWrapper
     {
         try {
             $changed = [];
-            if (in_array($dbName, self::$dbToWrap)) {
-                $dateTimeFields = self::getDateTimeFields($query);
-                $changed = self::changeDateTimeResults($dateTimeFields, $results);
-            } else {
-                $changed = $results;
-            }
+            $isTimeZoned = in_array($dbName, self::$dbToWrap);
+            $dateTimeFields = self::getDateTimeFields($query);
+            $changed = self::changeDateTimeResults($dateTimeFields, $results, $isTimeZoned);
             return $changed;
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
@@ -131,7 +128,7 @@ class DbWrapper
         }
     }
     
-    public static function changeDateTimeResults($dateTimeFields, $results)
+    public static function changeDateTimeResults($dateTimeFields, $results, $isTimeZoned)
     {
         try {
             $changed = [];
@@ -140,7 +137,7 @@ class DbWrapper
                     foreach ($field as $nRecord => $record) {
                         foreach ($record as $key => $value) {
                             if (in_array($key, $dateTimeFields)) {
-                                $changed[$keyField][$nRecord][$key] = self::setDateTime('d/m/Y H:i:s', $value, 'Etc/GMT-1', 'Europe/Rome');
+                                $changed[$keyField][$nRecord][$key] = self::setDateTime('d/m/Y H:i:s', $value, $isTimeZoned, 'Etc/GMT-1', 'Europe/Rome');
                             } else {
                                 $changed[$keyField][$nRecord][$key] = $value;
                             }

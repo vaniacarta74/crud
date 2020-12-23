@@ -38,7 +38,7 @@ class Check
                 $reverse = implode('/', array_reverse(explode('-', $value)));
                 $isDate = self::isValidDate($reverse, $isSmallDate);
             } else {
-                throw new \Exception('Formato data non analizzabile. Utilizzare dd/mm/yyyy');
+                throw new \Exception('Formato data non analizzabile. Utilizzare dd/mm/yyyy o yyyy-mm-dd');
             }
             return $isDate;
         } catch (\Throwable $e) {        
@@ -136,7 +136,7 @@ class Check
                     $isDateTime = false;
                 }
             } else {
-                throw new \Exception('Formato data e ora non analizzabile. Utilizzare dd/mm/yyyyThh:mm:ss');
+                throw new \Exception('Formato data e ora non analizzabile. Utilizzare dd/mm/yyyyThh:mm:ss o yyyy-mm-ddThh:mm:ss');
             }
             return $isDateTime;
         } catch (\Throwable $e) {        

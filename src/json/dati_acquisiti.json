@@ -121,7 +121,7 @@
             {
                 "name": "CONVERT(varchar, data_e_ora, 20)",
                 "alias": "data_e_ora",
-                "type": "dateTme"
+                "type": "dateTime"
             },
             {
                 "name": "tipo_dato",

@@ -19,14 +19,14 @@ class DbTest extends TestCase
 {
     /**
      * @group db
-     * @covers \vaniacarta74\Crud\Db::printConnectionString
+     * @covers \vaniacarta74\Crud\Db::run
      */
     public function testPrintConnectionStringEquals()
     {
-        $expected = 'mssql://192.168.1.43\SQL_SERVER_SPT@sa:Race14Maggio2016';
-                
-        $actual = Db::printConnectionString();
+//        $expected = 'mssql://192.168.1.43\SQL_SERVER_SPT@sa:Race14Maggio2016';
+//                
+//        $actual = Db::printConnectionString();
         
-        $this->assertEquals($expected, $actual);
+        $this->assertEquals('pippo', 'pluto');
     }
 }
