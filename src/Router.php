@@ -8,6 +8,7 @@
 
 namespace vaniacarta74\Crud;
 
+use vaniacarta74\Crud\Accessor;
 use vaniacarta74\Crud\Error;
 
 /**
@@ -15,24 +16,26 @@ use vaniacarta74\Crud\Error;
  *
  * @author Vania
  */
-class Router
+class Router extends Accessor
 {
-    private $db;
-    private $alias;
-    private $table;
-    private $resource;
-    private $id;
-    private $queryType;
-    private $queryParams;
-    private $urlParams;
+    protected $input;
+    protected $db;
+    protected $alias;
+    protected $table;
+    protected $resource;
+    protected $id;
+    protected $queryType;
+    protected $queryParams;
+    protected $urlParams;
     
-    public function __construct($path, $method)
+    public function __construct($path, $method, $input = null)
     {
-        try {            
+        try {
+            $this->setInput($input);            
             $strJson = @file_get_contents(__DIR__ . '/json/routes.json');
             $routes = json_decode($strJson, true);
-            $dbOk = $this->setDb($path, $routes);
-            $tableOk = $this->setTable($path, $routes);
+            $this->setDb($path, $routes);
+            $this->setTable($path, $routes);
             $this->setResource();
             $this->setId($path);
             $this->setQueryType($method);
@@ -42,7 +45,31 @@ class Router
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
-    }    
+    }
+
+    private function setInput($phpInput)
+    {
+        try {
+            if (count($_GET) > 0) {
+                $input = $_GET;
+            } else {
+                if (isset($phpInput)) {
+                    if (file_exists($phpInput)) {
+                        $post = @file_get_contents($phpInput);
+                    } else {
+                        throw new \Exception('File inesistente');
+                    }                    
+                } else {
+                    $post = @file_get_contents('php://input');
+                }
+                $input = $post ? json_decode($post, true) : null;
+            }            
+            $this->input = $input;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
     
     private function setDb($path, $routes)
     {
@@ -65,13 +92,8 @@ class Router
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
-    }
-    
-    public function getDb()
-    {
-        return $this->db;
-    }
-    
+    }    
+
     private function setTable($path, $routes)
     {
         try {
@@ -95,11 +117,6 @@ class Router
         }
     }
     
-    public function getTable()
-    {
-        return $this->table;
-    }
-    
     private function setResource()
     {
         try {
@@ -113,11 +130,6 @@ class Router
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
-    }
-    
-    public function getResource()
-    {
-        return $this->resource;
     }
     
     private function setId($path)
@@ -137,11 +149,6 @@ class Router
         }
     }
     
-    public function getId()
-    {
-        return $this->id;
-    }
-        
     private function setQueryType($method)
     {
         try {
@@ -180,15 +187,13 @@ class Router
         }
     }
     
-    public function getQueryType()
-    {
-        return $this->queryType;
-    }
-
     private function setQueryParams()
     {
         try {
             $path = __DIR__ . '/json/' . $this->table . '.json';
+            if (!file_exists($path)) {
+                throw new \Exception('File parametri query non definito');
+            }
             $strJson = @file_get_contents($path);
             $params = json_decode($strJson, true);
             $queryParams = $params[$this->queryType];
@@ -200,30 +205,22 @@ class Router
         }
     }
     
-    public function getQueryParams()
-    {
-        return $this->queryParams;
-    }
-    
     private function setUrlParams()
     {
         try {
             $urlParams = [];
             switch ($this->queryType) {
                 case 'list':
-                    $urlParams = $_GET;
+                case 'create':
+                    $urlParams = $this->input;
+                    //$urlParams = $_GET;
                     break;
                 case 'read':
                 case 'delete':
                     $urlParams['id'] = $this->id;
                     break;
-                case 'create':
-                    $post = @file_get_contents('php://input');
-                    $urlParams = json_decode($post, true);
-                    //$urlParams = $_GET;
-                    break;
                 case 'update':
-                    $urlParams = $_GET;
+                    $urlParams = $this->input;
                     $urlParams['id'] = $this->id;
                     break;
             }
@@ -236,10 +233,5 @@ class Router
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
-    }
-    
-    public function getUrlParams()
-    {
-        return $this->urlParams;
     }
 }
