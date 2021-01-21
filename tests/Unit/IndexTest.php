@@ -271,8 +271,8 @@ class IndexTest extends TestCase
                     "ok": true,
                     "method": "create",
                     "response": {
-                        "message": "Record 101700184 inserito con successo",
-                        "link": "/sscp/dati_acquisiti/101700184"
+                        "message": "Record @id@ inserito con successo",
+                        "link": "/sscp/dati_acquisiti/@id@"
                     }
                 }'
             ],
@@ -292,7 +292,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'update put' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700175?val=1.9&date=02/01/2020',
+                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700161?val=1.9&date=02/01/2020',
                 'params' => null,
                 'json' => false,
                 'method' => 'PUT',
@@ -300,13 +300,13 @@ class IndexTest extends TestCase
                     "ok": true,
                     "method": "update",
                     "response": {
-                        "message": "Record 101700175 aggiornato con successo",
-                        "link": "/sscp/dati_acquisiti/101700175"
+                        "message": "Record 101700161 aggiornato con successo",
+                        "link": "/sscp/dati_acquisiti/101700161"
                     }
                 }'
             ],
             'update patch' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700177?val=0.3&date=03/01/2020',
+                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700161?val=0.3&date=03/01/2020',
                 'params' => null,
                 'json' => false,
                 'method' => 'PATCH',
@@ -314,13 +314,13 @@ class IndexTest extends TestCase
                     "ok": true,
                     "method": "update",
                     "response": {
-                        "message": "Record 101700177 aggiornato con successo",
-                        "link": "/sscp/dati_acquisiti/101700177"
+                        "message": "Record 101700161 aggiornato con successo",
+                        "link": "/sscp/dati_acquisiti/101700161"
                     }
                 }'
             ],
             'delete standard' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700184',
+                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/@id@',
                 'params' => null,
                 'json' => false,
                 'method' => 'DELETE',
@@ -328,7 +328,7 @@ class IndexTest extends TestCase
                     "ok": true,
                     "method": "delete",
                     "response": {
-                        "message": "Record 101700184 cancellato con successo"
+                        "message": "Record @id@ cancellato con successo"
                     }
                 }'
             ]
@@ -342,10 +342,26 @@ class IndexTest extends TestCase
      * covers index.php
      * @dataProvider indexJsonStringProvider     
      */
-    public function testIndexJsonStringEqualsJsonString($url, $params, $json, $method, $expected)
+    public function testIndexJsonStringEqualsJsonString($rawUrl, $params, $json, $method, $rawExpected)
     {
+        $json = file_get_contents(__DIR__ . '/../providers/index.json');
+        $arrJson = json_decode($json, true);
+        $newId = $arrJson['id_dato'];
+        
+        if ($method === 'DELETE' || $method === 'POST') {            
+            $url = str_replace('@id@', $newId, $rawUrl);
+            $expected = str_replace('@id@', $newId, $rawExpected);
+        } else {
+            $url = $rawUrl;
+            $expected = $rawExpected;
+        }
+        
         $actual = Curl::run($url, $params, $json, $method);
         
-        $this->assertJsonStringEqualsJsonString($expected, $actual);             
+        $this->assertJsonStringEqualsJsonString($expected, $actual);
+        
+        if ($method === 'DELETE') {            
+            file_put_contents(__DIR__ . '/../providers/index.json','{"id_dato":' . ($newId + 1) . '}');
+        }
     }
 }

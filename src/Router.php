@@ -28,6 +28,12 @@ class Router extends Accessor
     protected $queryParams;
     protected $urlParams;
     
+    /**
+     * @param string $path
+     * @param string $method
+     * @param string $input
+     * @throws \Exception
+     */
     public function __construct($path, $method, $input = null)
     {
         try {
@@ -46,7 +52,11 @@ class Router extends Accessor
             throw $e;
         }
     }
-
+    
+    /**
+     * @param string $phpInput
+     * @throws \Exception
+     */
     private function setInput($phpInput)
     {
         try {
@@ -71,6 +81,12 @@ class Router extends Accessor
         }
     }
     
+    /**
+     * @param string $path
+     * @param array $routes
+     * @return boolean
+     * @throws \Exception
+     */
     private function setDb($path, $routes)
     {
         try {
@@ -93,7 +109,13 @@ class Router extends Accessor
             throw $e;
         }
     }    
-
+    
+    /**
+     * @param string $path
+     * @param array $routes
+     * @return boolean
+     * @throws \Exception
+     */
     private function setTable($path, $routes)
     {
         try {
@@ -117,6 +139,9 @@ class Router extends Accessor
         }
     }
     
+    /**
+     * @throws \Exception
+     */
     private function setResource()
     {
         try {
@@ -132,6 +157,10 @@ class Router extends Accessor
         }
     }
     
+    /**
+     * @param string $path
+     * @throws \Exception
+     */
     private function setId($path)
     {
         try {
@@ -149,6 +178,10 @@ class Router extends Accessor
         }
     }
     
+    /**
+     * @param string $method
+     * @throws \Exception
+     */
     private function setQueryType($method)
     {
         try {
@@ -187,6 +220,9 @@ class Router extends Accessor
         }
     }
     
+    /**
+     * @throws \Exception
+     */
     private function setQueryParams()
     {
         try {
@@ -205,6 +241,9 @@ class Router extends Accessor
         }
     }
     
+    /**
+     * @throws \Exception
+     */
     private function setUrlParams()
     {
         try {

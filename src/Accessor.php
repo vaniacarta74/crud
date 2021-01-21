@@ -19,8 +19,7 @@ class Accessor
     {
         try {
             $method = substr($name, 0, 3);
-            $property = lcfirst(substr($name, 3));
-            
+            $property = lcfirst(substr($name, 3));            
             switch ($method) {
                 case 'set':
                     $response = $this->setAccessor($property, $arguments);
@@ -29,7 +28,7 @@ class Accessor
                     $response = $this->getAccessor($property);
                     break;
                 default:
-                    throw new \Exception('Funzione inesistente');
+                    throw new \Exception('Nome metodo accessorio errato');
                     break;
             }
             if ($response) {
@@ -52,10 +51,12 @@ class Accessor
                 $response = true;
             }
             return $response;
+        // @codeCoverageIgnoreStart
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
-        }        
+        }
+        // @codeCoverageIgnoreEnd
     }
     
     public function getAccessor($property)
@@ -67,9 +68,11 @@ class Accessor
                 $response = false;
             }
             return $response;
+        // @codeCoverageIgnoreStart
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
-        }        
+        }
+        // @codeCoverageIgnoreEnd
     }
 }
