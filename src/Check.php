@@ -19,14 +19,10 @@ class Check
 {
     
     /**
-     * Stampa il tempo trascorso da una certa data.
-     *
-     * Il metodo benchmark() fornisce l'intervallo di tempo intercorso da una
-     * certa data. Viene utilizzato per calcolare il tempo di esecuzione della
-     * procedura.
-     *
-     * @param string $strDateTime Data nel formato "YYYY-mm-dd HH:ii:ss.millisec"
-     * @return string Intervallo intercorso nel formato "secondi,millisecondi"
+     * @param string $value
+     * @param boolean $isSmall
+     * @return boolean
+     * @throws \Exception
      */
     public static function isDate($value, $isSmall = null)
     {
@@ -41,87 +37,133 @@ class Check
                 throw new \Exception('Formato data non analizzabile. Utilizzare dd/mm/yyyy o yyyy-mm-dd');
             }
             return $isDate;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param string $value
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isTime($value)
     {
         try {
+            if (!is_string($value)) {
+                throw new \Exception('Tipo parametro errato');
+            }
             if (preg_match('/^([01]{1}[0-9]|2[0-3])(:[0-5][0-9]){2}$/', $value)) {
                 $isTime = true;
             } else {
                 $isTime = false;
             }
             return $isTime;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param string $value
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isLatinDate($value)
     {
         try {
+            if (!is_string($value)) {
+                throw new \Exception('Tipo parametro errato');
+            }
             if (preg_match('/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/', $value)) {
                 $isLatinDate = true;
             } else {
                 $isLatinDate = false;
             }
             return $isLatinDate;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param string $value
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isAngloDate($value)
     {
         try {
+            if (!is_string($value)) {
+                throw new \Exception('Tipo parametro errato');
+            }
             if (preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $value)) {
                 $isAngloDate = true;
             } else {
                 $isAngloDate = false;
             }
             return $isAngloDate;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param string $value
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isLatinDateTime($value)
     {
         try {
+            if (!is_string($value)) {
+                throw new \Exception('Tipo parametro errato');
+            }
             if (preg_match('/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}[T\s]([01]{1}[0-9]|2[0-3])(:[0-5][0-9]){2}$/', $value)) {
                 $isLatinDateTime = true;
             } else {
                 $isLatinDateTime = false;
             }
             return $isLatinDateTime;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param string $value
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isAngloDateTime($value)
     {
         try {
+            if (!is_string($value)) {
+                throw new \Exception('Tipo parametro errato');
+            }
             if (preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}[T\s]([01]{1}[0-9]|2[0-3])(:[0-5][0-9]){2}$/', $value)) {
                 $isAngloDateTime = true;
             } else {
                 $isAngloDateTime = false;
             }
             return $isAngloDateTime;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param string $value
+     * @param boolean $isSmall
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isDateTime($value, $isSmall = null)
     {
         try {
@@ -139,15 +181,24 @@ class Check
                 throw new \Exception('Formato data e ora non analizzabile. Utilizzare dd/mm/yyyyThh:mm:ss o yyyy-mm-ddThh:mm:ss');
             }
             return $isDateTime;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
-    private static function isValidDate($value, $isSmall)
+    /**
+     * @param string $value
+     * @param boolean $isSmall
+     * @return boolean
+     * @throws \Exception
+     */
+    public static function isValidDate($value, $isSmall)
     {
         try {
+            if (!is_string($value) || !is_bool($isSmall)) {
+                throw new \Exception('Formato parametri non valido');
+            }
             if (preg_match('/^(((0[1-9]|[12]\d|3[01])\/(0[13578]|1[02])\/((19|[2-9]\d)\d{2}))|((0[1-9]|[12]\d|30)\/(0[13456789]|1[012])\/((19|[2-9]\d)\d{2}))|((0[1-9]|1\d|2[0-8])\/02\/((19|[2-9]\d)\d{2}))|(29\/02\/((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))))$/', $value)) {
                 if ($isSmall) {                    
                     $isDate = self::isSmallDate($value);
@@ -158,80 +209,121 @@ class Check
                 $isDate = false;
             }
             return $isDate;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
-    private static function isSmallDate($value)
+    /**
+     * @param string $value
+     * @return boolean
+     * @throws \Exception
+     */
+    public static function isSmallDate($value)
     {
         try {
+            if (!is_string($value)) {
+                throw new \Exception('Formato parametro non valido');
+            }
             $max = \DateTime::createFromFormat('d/m/Y', '06/06/2079');
             $current = \DateTime::createFromFormat('d/m/Y', $value);
             $isDate = ($current < $max) ? true : false;
             return $isDate;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param numeric $value
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isInteger($value)
     {
         try {
+            if (!is_numeric($value)) {
+                throw new \Exception('Formato parametro non valido');
+            }
             if (preg_match('/^[0-9]+$/', $value)) {
                 $isInteger = true;
             } else {
                 $isInteger = false;
             }
             return $isInteger;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param numeric $value
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isFloat($value)
     {
         try {
+            if (!is_numeric($value)) {
+                throw new \Exception('Formato parametro non valido');
+            }
             if (preg_match('/^[0-9]+(\.[0-9]+)?$/', $value)) {
                 $isFloat = true;
             } else {
                 $isFloat = false;
             }
             return $isFloat;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param string $value
+     * @param array $admitted
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isEnum($value, $admitted)
     {
         try {
+            if (!is_string($value) || !is_array($admitted)) {
+                throw new \Exception('Formato parametri non valido');
+            }
             if (in_array($value, $admitted)) {
                 $isEnum = true;
             } else {
                 $isEnum = false;
             }
             return $isEnum;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
     }
     
+    /**
+     * @param string $value
+     * @return boolean
+     * @throws \Exception
+     */
     public static function isString($value)
     {
         try {
+            if (!is_string($value)) {
+                throw new \Exception('Formato parametro non valido');
+            }
             if (preg_match('/^.+$/', $value)) {
                 $isString = true;
             } else {
                 $isString = false;
             }
             return $isString;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }

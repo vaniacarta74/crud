@@ -155,7 +155,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list no check' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=pippo&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10.4&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
