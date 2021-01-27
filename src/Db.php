@@ -417,9 +417,9 @@ class Db
                 $response['records'] = $this->fetch();
             } elseif ($this->queryType === 'create') {
                 $this->id = $this->pdo->lastInsertId();
-                $response['records'] = null;
+                $response['records'] = [];
             } else {
-                $response['records'] = null;
+                $response['records'] = [];
             }
             $response['id'] = isset($this->id) ? $this->id : null;
             return $response;

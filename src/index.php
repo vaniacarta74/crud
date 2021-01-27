@@ -17,7 +17,7 @@ try {
 //    $taditional = 'src/index.php?db=' . $_GET['db'] . '&table=' . $_GET['table'] . $varId . '&';
 //    $restful = 'api/' . $_GET['db'] . '/' . $_GET['table'] . (isset($varId) ? '/' . $_GET['id'] : null) . '?';
 //    $url = str_replace($taditional, $restful, $_SERVER['REQUEST_URI']);
-//    $method = 'DELETE';
+//    $method = 'PATCH';
     
     $url = $_SERVER['REQUEST_URI'];
     $method = $_SERVER['REQUEST_METHOD'];

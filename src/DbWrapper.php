@@ -18,11 +18,24 @@ use vaniacarta74\Crud\Check;
  */
 class DbWrapper
 {
+    /**
+     * @var array 
+     */
     private static $dbToWrap = ['SPT'];
     
+    /**
+     * @param string $dbName
+     * @param array $query
+     * @param array $params
+     * @return array
+     * @throws \PDOException
+     */
     public static function dateTime($dbName, $query, $params)
     {
         try {
+            if (!is_string($dbName) || !is_array($query) || !is_array($params)) {
+                throw new \Exception('Formato parametri non valido');
+            }
             $db = new db($dbName);
             $wrappedParams = self::setDateTimeParams($dbName, $params);
             $results = $db->run($query, $wrappedParams);
@@ -34,15 +47,30 @@ class DbWrapper
         }
     } 
     
+    /**
+     * @param string $dbName
+     * @param array $params
+     * @return array
+     * @throws \Exception
+     */
     public static function setDateTimeParams($dbName, $params)
     {
         try {
+            if (!is_string($dbName) || !is_array($params)) {
+                throw new \Exception('Formato parametri non valido');
+            }
             $changed = [];
             $isTimeZoned = in_array($dbName, self::$dbToWrap);
             foreach ($params as $nParam => $param) {
                 foreach ($param as $key => $value) {
-                    if ($key === 'value' && $param['check']['type'] === 'dateTime') {
-                        $changed[$nParam][$key] = self::setDateTime('Y-m-d H:i:s', $value, $isTimeZoned, 'Europe/Rome', 'Etc/GMT-1');
+                    if ($key === 'value') {
+                        if (!array_key_exists('check', $param) || !array_key_exists('type', $param['check'])) {
+                            throw new \Exception('Struttura array parametri non valida');
+                        } elseif ($param['check']['type'] === 'dateTime') {
+                            $changed[$nParam][$key] = self::setDateTime('Y-m-d H:i:s', $value, $isTimeZoned, 'Europe/Rome', 'Etc/GMT-1');
+                        } else {
+                            $changed[$nParam][$key] = $value;
+                        }
                     } else {
                         $changed[$nParam][$key] = $value;
                     }
@@ -55,9 +83,21 @@ class DbWrapper
         }
     }
     
+    /**
+     * @param string $format
+     * @param string $oldDateTime
+     * @param bool $isTimeZoned
+     * @param string $timeZoneIn
+     * @param string $timeZoneOut
+     * @return type
+     * @throws \Exception
+     */
     public static function setDateTime($format, $oldDateTime, $isTimeZoned, $timeZoneIn, $timeZoneOut)
     {
-        try {                        
+        try {
+            if (!is_string($format) || !is_string($oldDateTime) || !is_bool($isTimeZoned) || !is_string($timeZoneIn) || !is_string($timeZoneOut)) {
+                throw new \Exception('Formato parametri non valido');
+            }
             $dateTime = self::formatDateTime($oldDateTime);
             if ($isTimeZoned) {
                 $dateTimeZoneIn = new \DateTimeZone($timeZoneIn);
@@ -75,9 +115,17 @@ class DbWrapper
         }
     }
     
+    /**
+     * @param string $oldDateTime
+     * @return array
+     * @throws \Exception
+     */
     public static function formatDateTime($oldDateTime)
     {
         try {
+            if (!is_string($oldDateTime)) {
+                throw new \Exception('Formato parametro non valido');
+            }
             $format = self::getDateTimeFormat($oldDateTime);
             if ($format === 'd/m/Y' || $format === 'Y-m-d') {
                 $dateTime['format'] = $format . ' H:i:s';
@@ -93,9 +141,17 @@ class DbWrapper
         }
     }
     
+    /**
+     * @param string $value
+     * @return string
+     * @throws \Exception
+     */
     public static function getDateTimeFormat($value)
     {
         try {
+            if (!is_string($value)) {
+                throw new \Exception('Formato parametro non valido');
+            }
             if (Check::isLatinDateTime($value)) {
                 $format = 'd/m/Y H:i:s';
             } elseif (Check::isAngloDateTime($value)) {
@@ -114,10 +170,19 @@ class DbWrapper
         }
     }
     
+    /**
+     * @param string $dbName
+     * @param array $query
+     * @param array $results
+     * @return array
+     * @throws \Exception
+     */
     public static function setDateTimeResults($dbName, $query, $results)
     {
         try {
-            $changed = [];
+            if (!is_string($dbName) || !is_array($query) || !is_array($results)) {
+                throw new \Exception('Formato parametri non valido');
+            }
             $isTimeZoned = in_array($dbName, self::$dbToWrap);
             $dateTimeFields = self::getDateTimeFields($query);
             $changed = self::changeDateTimeResults($dateTimeFields, $results, $isTimeZoned);
@@ -128,9 +193,19 @@ class DbWrapper
         }
     }
     
+    /**
+     * @param array $dateTimeFields
+     * @param array $results
+     * @param bool $isTimeZoned
+     * @return array
+     * @throws \Exception
+     */
     public static function changeDateTimeResults($dateTimeFields, $results, $isTimeZoned)
     {
         try {
+            if (!is_array($dateTimeFields) || !is_array($results) || !is_bool($isTimeZoned)) {
+                throw new \Exception('Formato parametri non valido');
+            }
             $changed = [];
             foreach ($results as $keyField => $field) {
                 if ($keyField === 'records') {
@@ -154,18 +229,38 @@ class DbWrapper
         }
     }
     
+    /**
+     * @param array $query
+     * @return array
+     * @throws \Exception
+     */
     public static function getDateTimeFields($query)
     {
         try {
+            if (!is_array($query) || !array_key_exists('type', $query)) {
+                throw new \Exception('Formato parametro non valido o mal strutturato');
+            }
             $dateTimeFields = [];
             $type = $query['type'];
             if ($type === 'list' || $type === 'read') {
-                $fields = $query['fields'];
-                foreach ($fields as $nField => $field) {
-                    if ($field['type'] === 'dateTime') {
-                        $dateTimeFields[] = isset($field['alias']) ? $field['alias'] : $field['name'];
-                    }                
-                }
+                if (array_key_exists('fields', $query)) {
+                    $fields = $query['fields'];
+                    foreach ($fields as $nField => $field) {
+                        if (array_key_exists('type', $field)) {
+                            if ($field['type'] === 'dateTime') {
+                                if (array_key_exists('alias', $field) && array_key_exists('name', $field)) {
+                                    $dateTimeFields[] = isset($field['alias']) ? $field['alias'] : $field['name'];
+                                } else {
+                                    throw new \Exception('Array query mal strutturato');
+                                }
+                            }
+                        } else {
+                            throw new \Exception('Array query mal strutturato');
+                        }                                        
+                    }
+                } else {
+                    throw new \Exception('Array query mal strutturato');
+                }                
             }
             return $dateTimeFields;
         } catch (\Exception $e) {

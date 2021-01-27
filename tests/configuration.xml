@@ -27,7 +27,7 @@
     
     <groups>
         <exclude>
-            <!--<group>mains</group>-->
+            <group>pippo</group>
         </exclude>    
     </groups>
 

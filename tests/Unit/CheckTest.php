@@ -16,7 +16,7 @@ use vaniacarta74\Crud\Check;
  *
  * @author Vania
  */
-class CheckTest  extends TestCase
+class CheckTest extends TestCase
 {
     /**
      * @group check

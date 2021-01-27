@@ -344,8 +344,8 @@ class IndexTest extends TestCase
      */
     public function testIndexJsonStringEqualsJsonString($rawUrl, $params, $json, $method, $rawExpected)
     {
-        $json = file_get_contents(__DIR__ . '/../providers/index.json');
-        $arrJson = json_decode($json, true);
+        $jsonId = file_get_contents(__DIR__ . '/../providers/index.json');
+        $arrJson = json_decode($jsonId, true);
         $newId = $arrJson['id_dato'];
         
         if ($method === 'DELETE' || $method === 'POST') {            
