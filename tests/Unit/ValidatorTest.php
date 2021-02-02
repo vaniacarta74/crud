@@ -4478,7 +4478,7 @@ class ValidatorTest extends TestCase
                             'type' => 'integer',
                             'params' => []
                         ],
-                        'value' => 'pippo'
+                        'value' => 34.5
                     ]
                 ]
             ]

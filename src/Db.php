@@ -30,23 +30,43 @@ class Db
     private $query;
     private $id;
     
+    /**
+     * @param string $db
+     * @param string $driver
+     * @param string $host
+     * @param string $user
+     * @param string $password
+     * @throws \Exception
+     */
     public function __construct($db, $driver = null, $host = null, $user = null, $password = null) {
         try {
+            if (!is_string($db)) {
+                throw new \Exception('Formato parametro non valido');
+            }
             $this->db = $db;
             $this->driver = isset($driver) ? $driver : 'dblib';
             $this->host = isset($host) ? $host : MSSQL_HOST;
             $this->user = isset($user) ? $user : MSSQL_USER;
             $this->password = isset($password) ? $password : MSSQL_PASSWORD;
             $this->dsn = $this->driver . ':host=' . $this->host . ';dbname=' . $this->db;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
     }
     
+    /**
+     * @param array $queryParams
+     * @param array $bindParams
+     * @return array
+     * @throws \PDOException
+     */
     public function run($queryParams, $bindParams)
     {
         try {
+            if (!is_array($queryParams) || !is_array($bindParams)) {
+                throw new \PDOException('Formato parametri non valido');
+            }
             $this->connect();
             $this->assemble($queryParams);
             $this->prepare();
@@ -59,21 +79,11 @@ class Db
             throw $e;
         }
     }
-    
-    public function go($query, $queryType = null)
-    {
-        try {
-            $this->queryType = isset($queryType) ? $queryType : 'list';
-            $this->query = $query;
-            $this->connect();
-            $this->query();
-            return $this->getResults();
-        } catch (\PDOException $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
+      
+    /**
+     * 
+     * @throws \PDOException
+     */
     public function connect()
     {
         try {
@@ -112,9 +122,16 @@ class Db
         }
     }
     
+    /**
+     * @param array $queryParams
+     * @throws \PDOException
+     */
     public function assemble($queryParams)
     {
         try {
+            if (!is_array($queryParams) || !array_key_exists('type', $queryParams) || !in_array($queryParams['type'], array('read', 'list', 'create', 'update', 'delete'))) {
+                throw new \PDOException('Formato parametri, struttura o tipo elaborazione non valida');
+            }
             $this->queryType = $queryParams['type'];
             $method = 'prepare' . ucfirst($this->queryType);
             $rawQuery = $this->$method($queryParams);
@@ -125,19 +142,34 @@ class Db
         }
     }
     
+    /**
+     * @throws \PDOException
+     */
     public function prepare()
     {
-        try {            
-            $this->pdoStmt = $this->pdo->prepare($this->query);
+        try {
+            if (is_string($this->query)) {
+                $this->pdoStmt = $this->pdo->prepare($this->query);
+            } else {
+                throw new \PDOException('Formato query non valido: usare string');
+            }
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
     }
     
+    /**
+     * @param array $queryParams
+     * @return string
+     * @throws \Exception
+     */
     private function prepareList($queryParams)
     {
         try {
+            if (!is_array($queryParams) || !array_key_exists('fields', $queryParams) || !array_key_exists('table', $queryParams) || !array_key_exists('where', $queryParams) || !array_key_exists('order', $queryParams)) {
+                throw new \Exception('Formato parametri, struttura o tipo elaborazione non valida');
+            }
             $fields = $this->setSelectFields($queryParams['fields']);
             $table = $this->setTable($queryParams['table']);
             $where = $this->setWhere($queryParams['where']);
@@ -152,9 +184,17 @@ class Db
         }
     }
     
+    /**
+     * @param array $queryParams
+     * @return string
+     * @throws \Exception
+     */
     private function prepareRead($queryParams)
     {
         try {
+            if (!is_array($queryParams) || !array_key_exists('fields', $queryParams) || !array_key_exists('table', $queryParams) || !array_key_exists('where', $queryParams) || !array_key_exists('order', $queryParams)) {
+                throw new \Exception('Formato parametri, struttura o tipo elaborazione non valida');
+            }
             $fields = $this->setSelectFields($queryParams['fields']);
             $table = $this->setTable($queryParams['table']);
             $where = $this->setWhere($queryParams['where']);
@@ -169,95 +209,17 @@ class Db
         }
     }
     
-    private function setSelectFields($arrFields)
-    {
-        try {
-            $strFields = [];
-            foreach ($arrFields as $field) {
-                if (isset($field['alias'])) {
-                    $strFields[] = $field['name'] . ' AS ' . $field['alias'];
-                } else {
-                    $strFields[] = $field['name'];
-                }                
-            }
-            if (count($strFields) === 0) {
-                $fields = '*';
-            } else {
-                $fields = implode(', ', $strFields);
-            }
-            return $fields;
-        } catch (\Exception $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
-    private function setTable($table)
-    {
-        try {            
-            return $table;
-        } catch (\Exception $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
-    private function setWhere($arrWhere)
-    {
-        try {
-            $keys = array_keys($arrWhere);
-            $opAndOr = strtoupper($keys[0]); 
-            $subExp = $this->setWhereRecursive($arrWhere);
-            $where = implode(' ' . $opAndOr . ' ', $subExp);
-            
-            return $where;
-        } catch (\Exception $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
-    private function setWhereRecursive($params) 
-    {
-        try {
-            foreach ($params as $key => $param) {
-                if ($key === 'and' || $key === 'or') {
-                    $opAndOr = strtoupper($key);
-                    $subExp = self::setWhereRecursive($param);
-                    $exp[] = '(' . implode(' ' . $opAndOr . ' ', $subExp) . ')';
-                } else {
-                    $exp[] =  $param['field'] . ' ' . $param['operator'] . ' ' . $param['value']['bind'];                       
-                }
-            }
-            return $exp;
-        } catch (\Exception $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }        
-    }
-    
-    private function setOrder($arrOrders)
-    {
-        try {
-            $strOrders = [];
-            foreach ($arrOrders as $order) {
-                $strOrders[] = $order['field'] . ' ' . strtoupper($order['type']);               
-            }
-            if (count($strOrders) === 0) {
-                $orders = null;
-            } else {
-                $orders = implode(',', $strOrders);
-            }
-            return $orders;
-        } catch (\Exception $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
+    /**
+     * @param array $queryParams
+     * @return string
+     * @throws \Exception
+     */
     private function prepareCreate($queryParams)
     {
         try {
+            if (!is_array($queryParams) || !array_key_exists('table', $queryParams) || !array_key_exists('values', $queryParams)) {
+                throw new \Exception('Formato parametri, struttura o tipo elaborazione non valida');
+            }
             $table = $this->setTable($queryParams['table']);
             $fields = $this->setInsertFields($queryParams['values']);
             $values = $this->setValues($queryParams['values']);
@@ -271,39 +233,17 @@ class Db
         }
     }
     
-    private function setInsertFields($arrValues)
-    {
-        try {
-            $strFields = [];
-            foreach ($arrValues as $params) {                
-                $strFields[] = $params['field'];
-            }
-            $fields = implode(', ', $strFields);
-            return $fields;
-        } catch (\Exception $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
-    private function setValues($arrValues)
-    {
-        try {
-            $strValues = [];
-            foreach ($arrValues as $params) {                
-                $strValues[] = $params['value']['bind'];
-            }
-            $values = implode(', ', $strValues);
-            return $values;
-        } catch (\Exception $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
+    /**
+     * @param array $queryParams
+     * @return string
+     * @throws \Exception
+     */
     private function prepareUpdate($queryParams)
     {
         try {
+            if (!is_array($queryParams) || !array_key_exists('table', $queryParams) || !array_key_exists('set', $queryParams) || !array_key_exists('where', $queryParams)) {
+                throw new \Exception('Formato parametri, struttura o tipo elaborazione non valida');
+            }
             $table = $this->setTable($queryParams['table']);
             $sets = $this->setSets($queryParams['set']);
             $where = $this->setWhere($queryParams['where']);
@@ -317,24 +257,17 @@ class Db
         }
     }
     
-    private function setSets($arrSets)
-    {
-        try {
-            $strSets = [];
-            foreach ($arrSets as $params) {                
-                $strSets[] = $params['field'] . ' = ' . $params['value']['bind'];
-            }
-            $sets = implode(', ', $strSets);
-            return $sets;
-        } catch (\Exception $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
+    /**
+     * @param array $queryParams
+     * @return string
+     * @throws \Exception
+     */
     private function prepareDelete($queryParams)
     {
         try {
+            if (!is_array($queryParams) || !array_key_exists('table', $queryParams) || !array_key_exists('where', $queryParams)) {
+                throw new \Exception('Formato parametri, struttura o tipo elaborazione non valida');
+            }
             $table = $this->setTable($queryParams['table']);
             $where = $this->setWhere($queryParams['where']);
             
@@ -347,39 +280,362 @@ class Db
         }
     }
     
+    /**
+     * @param array $arrFields
+     * @return string
+     * @throws \Exception
+     */
+    private function setSelectFields($arrFields)
+    {
+        try {
+            if (!is_array($arrFields)) {
+                throw new \Exception('Formato parametro non valido');
+            }
+            $strFields = [];
+            foreach ($arrFields as $field) {
+                if (array_key_exists('name', $field)) {
+                    if (isset($field['alias'])) {
+                        $strFields[] = $field['name'] . ' AS ' . $field['alias'];
+                    } else {
+                        $strFields[] = $field['name'];
+                    }
+                } else {
+                    throw new \PDOException('Struttura array non valida: richiesta chiave "name"');
+                }
+            }
+            if (count($strFields) === 0) {
+                $fields = '*';
+            } else {
+                $fields = implode(', ', $strFields);
+            }
+            return $fields;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param string $table
+     * @return string
+     * @throws \Exception
+     */
+    private function setTable($table)
+    {
+        try {
+            if (!is_string($table)) {
+                throw new \Exception('Formato parametro non valido');
+            }
+            return $table;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param array $arrWhere
+     * @return string/null
+     * @throws \Exception
+     */
+    private function setWhere($arrWhere)
+    {
+        try {
+            if (!is_array($arrWhere)) {
+                throw new \Exception('Formato parametro non valido');
+            }
+            if (count($arrWhere) > 0) {                
+                $keys = array_keys($arrWhere);
+                if (preg_match('/^(and|or)(.)*$/', $keys[0], $match)) {
+                    $opAndOr = strtoupper($match[1]); 
+                    $subExp = $this->setWhereRecursive($arrWhere);
+                    $where = implode(' ' . $opAndOr . ' ', $subExp);
+                } else {
+                    throw new \Exception('La prima chiave dell\'array where deve essere and o or');
+                }
+            } else {            
+                $where = null;
+            }
+            return $where;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param array $params
+     * @return array
+     * @throws \Exception
+     */
+    private function setWhereRecursive($params) 
+    {
+        try {
+            if (!is_array($params)) {
+                throw new \Exception('Tipo parametro errato usare array');
+            }
+            foreach ($params as $key => $param) {
+                if (preg_match('/^(and|or)(.)*$/', $key, $match)) {
+                    $opAndOr = strtoupper($match[1]);
+                    $subExp = $this->setWhereRecursive($param);                                        
+                    $exp[] = '(' . implode(' ' . $opAndOr . ' ', $subExp) . ')';
+                } else {
+                    if (array_key_exists('field', $param) && array_key_exists('operator', $param) && array_key_exists('value', $param) && array_key_exists('bind', $param['value'])) {
+                        $exp[] =  $param['field'] . ' ' . $param['operator'] . ' ' . $param['value']['bind']; 
+                    } else {
+                        throw new \Exception('Struttura array where non corretta');
+                    }
+                }
+            }
+            return $exp;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }        
+    }
+    
+    /**
+     * @param array $arrOrders
+     * @return string/null
+     * @throws \Exception
+     */
+    private function setOrder($arrOrders)
+    {
+        try {
+            if (!is_array($arrOrders)) {
+                throw new \Exception('Tipo parametro errato usare array');
+            }
+            $strOrders = [];
+            foreach ($arrOrders as $order) {
+                if (array_key_exists('field', $order) && array_key_exists('type', $order)) {
+                    $strOrders[] = $order['field'] . ' ' . strtoupper($order['type']); 
+                } else {
+                    throw new \Exception('Struttura array order non corretta');
+                }
+            }
+            if (count($strOrders) === 0) {
+                $orders = null;
+            } else {
+                $orders = implode(', ', $strOrders);
+            }
+            return $orders;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }   
+    
+    /**
+     * 
+     * @param array $arrValues
+     * @return string
+     * @throws \Exception
+     */
+    private function setInsertFields($arrValues)
+    {
+        try {
+            if (!is_array($arrValues)) {
+                throw new \Exception('Tipo parametro errato usare array');
+            }
+            $strFields = [];
+            foreach ($arrValues as $params) { 
+                if (array_key_exists('field', $params)) {
+                    $strFields[] = $params['field'];
+                } else {
+                    throw new \Exception('Struttura array values non corretta');
+                }
+            }
+            $fields = implode(', ', $strFields);
+            return $fields;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param array $arrValues
+     * @return string
+     * @throws \Exception
+     */
+    private function setValues($arrValues)
+    {
+        try {
+            if (!is_array($arrValues)) {
+                throw new \Exception('Tipo parametro errato usare array');
+            }
+            $strValues = [];
+            foreach ($arrValues as $params) {
+                if (array_key_exists('value', $params) && array_key_exists('bind', $params['value'])) {
+                    $strValues[] = $params['value']['bind'];
+                } else {
+                    throw new \Exception('Struttura array values non corretta');
+                }
+            }
+            $values = implode(', ', $strValues);
+            return $values;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param array $arrSets
+     * @return string
+     * @throws \Exception
+     */
+    private function setSets($arrSets)
+    {
+        try {
+            if (!is_array($arrSets)) {
+                throw new \Exception('Tipo parametro errato usare array');
+            }
+            $strSets = [];
+            foreach ($arrSets as $params) { 
+                if (array_key_exists('field', $params) && array_key_exists('value', $params) && array_key_exists('bind', $params['value'])) {
+                    $strSets[] = $params['field'] . ' = ' . $params['value']['bind'];
+                } else {
+                    throw new \Exception('Struttura array set non corretta');
+                }
+            }
+            $sets = implode(', ', $strSets);
+            return $sets;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @return bool
+     * @throws \PDOException
+     */
     public function exec()
     {
         try {
-            $this->pdoStmt->execute();
+            return $this->pdoStmt->execute();
+        // @codeCoverageIgnoreStart
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
+        // @codeCoverageIgnoreEnd
     }
     
+    /**
+     * @param array $bindParams
+     * @return boolean
+     * @throws \PDOException
+     */
     public function bind($bindParams)
     {
         try {
-            foreach ($bindParams as $param) {
-                $type = constant('\PDO::PARAM_' . strtoupper($param['type']));
-                $this->pdoStmt->bindParam($param['bind'], $param['value'], $type);
+            if (!is_array($bindParams)) {
+                throw new \PDOException('Tipo parametro errato usare array');
             }
+            $isOk = true;
+            foreach ($bindParams as $param) {
+                if (array_key_exists('type', $param) && (in_array($param['type'], array('str', 'int', 'bool', 'null'))) && array_key_exists('bind', $param) && array_key_exists('value', $param)) {
+                    $type = constant('\PDO::PARAM_' . strtoupper($param['type']));
+                    if (!$this->pdoStmt->bindParam($param['bind'], $param['value'], $type)) {
+                    // @codeCoverageIgnoreStart
+                        $isOk = false;                        
+                    }
+                    // @codeCoverageIgnoreEnd
+                } else {
+                    throw new \PDOException('Struttura array bind params non corretta');
+                }
+            }
+            return $isOk;
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
     }
     
+    /**
+     * @param array $bindParams
+     * @throws \Exception
+     */
     public function setId($bindParams)
     {
         try {
+            if (!is_array($bindParams)) {
+                throw new \Exception('Tipo parametro errato usare array');
+            }
             foreach ($bindParams as $param) {
-                if ($param['param'] === 'id') {
-                    $this->id = $param['value'];
-                    break;
+                if (array_key_exists('param', $param)) {
+                    if ($param['param'] === 'id') {
+                        if (array_key_exists('value', $param)) {
+                            $this->id = $param['value'];
+                            break;
+                        } else {
+                            throw new \Exception('Struttura array bind params non corretta');
+                        }
+                    }
+                } else {
+                    throw new \Exception('Struttura array bind params non corretta');
                 }
             }
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param string $query
+     * @return array
+     * @throws \PDOException
+     */
+    public function go($query)
+    {
+        try {
+            if (!is_string($query)) {
+                throw new \PDOException('Tipo parametro errato usare string');
+            }
+            $this->checkQuery($query);            
+            $this->connect();
+            $this->query();
+            return $this->getResults();
         } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param string $query
+     * @throws \Exception
+     */
+    public function checkQuery($query)
+    {
+        try {
+            if (!is_string($query)) {
+                throw new \Exception('Tipo parametro errato usare string');
+            }
+            if (preg_match('/^(SELECT|INSERT|UPDATE|DELETE)(.)*$/', $query, $match)) {
+                switch ($match[1]) {
+                    case 'SELECT':
+                        $type = 'list';
+                        break;
+                    case 'INSERT':
+                        $type = 'create';
+                        break;
+                    case 'UPDATE':
+                        $type = 'update';
+                        break;
+                    case 'DELETE':
+                        $type = 'delete';
+                        break;
+                }
+            } else {
+                throw new \Exception('Query non regolare');
+            }            
+            $this->queryType = $type;
+            $this->query = $query;
+        } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
@@ -389,26 +645,18 @@ class Db
     {
         try {
             $this->pdoStmt = $this->pdo->query($this->query);
+        // @codeCoverageIgnoreStart            
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
-    }
+        // @codeCoverageIgnoreEnd
+    }   
     
-    public function fetch($style = null)
-    {
-        try {
-            $pdoStyle = isset($style) ? $style : \PDO::FETCH_ASSOC;
-            while ($row = $this->pdoStmt->fetch($pdoStyle)) {
-                $records[] = $row;
-            }            
-            return $records;
-        } catch (\PDOException $e) {
-            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
-            throw $e;
-        }
-    }
-    
+    /**
+     * @return array
+     * @throws \PDOException
+     */
     private function getResults()
     {
         try {
@@ -423,9 +671,36 @@ class Db
             }
             $response['id'] = isset($this->id) ? $this->id : null;
             return $response;
+        // @codeCoverageIgnoreStart
         } catch (\PDOException $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
+        // @codeCoverageIgnoreEnd
+    }
+    
+    /**
+     * @param obj $style
+     * @return array
+     * @throws \PDOException
+     */
+    public function fetch($style = null)
+    {
+        try {
+            if (isset($style) && in_array($style, array(\PDO::FETCH_ASSOC, \PDO::FETCH_BOTH, \PDO::FETCH_NUM))) {
+                $pdoStyle = $style;
+            } else {
+                $pdoStyle = \PDO::FETCH_ASSOC;
+            }            
+            while ($row = $this->pdoStmt->fetch($pdoStyle)) {
+                $records[] = $row;
+            }            
+            return $records;
+        // @codeCoverageIgnoreStart
+        } catch (\PDOException $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+        // @codeCoverageIgnoreEnd
     }
 }

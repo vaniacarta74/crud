@@ -689,7 +689,7 @@ class RouterTest extends TestCase
     }
     
     /**
-     * @group bot
+     * @group router
      * @covers \vaniacarta74\Crud\Router::__construct
      * @dataProvider constructorProvider
      */
