@@ -33,7 +33,7 @@ class Utility
     public static function benchmark($strDateTime)
     {
         try {
-            $start = \dateTime::createFromFormat('Y-m-d H:i:s.u', $strDateTime, new \DateTimeZone('Europe/Rome'));
+            $start = \DateTime::createFromFormat('Y-m-d H:i:s.u', $strDateTime, new \DateTimeZone('Europe/Rome'));
             if (!$start) {
                 throw new \Exception('Data inizio benchmark inesistente');
             }
@@ -49,7 +49,7 @@ class Utility
                 $interval = $dateInterval->format('%h ora, %i min e %s sec');
             }
             return $interval;
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
@@ -83,7 +83,7 @@ class Utility
                 throw new \Exception('Funzione o methodo non eseguibile');
             }        
             return $result;
-        } catch (\Throwable $e) {        
+        } catch (\Exception $e) {        
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;        
         }
