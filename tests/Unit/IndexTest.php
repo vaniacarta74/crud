@@ -26,21 +26,21 @@ class IndexTest extends TestCase
     {
         $data = [
             'list datetime latin' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
                 'provider' => 'sscpList.json'
             ],
             'list datetime anglo' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10230&type=2&datefrom=2017-08-27T00:00:00&dateto=2017-08-27T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=2&datefrom=2017-08-27T00:00:00&dateto=2017-08-27T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
                 'provider' => 'sscpList.json'
             ],
             'list datetime mixed' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=2017-08-27T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=2017-08-27T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -72,7 +72,7 @@ class IndexTest extends TestCase
     {
         $data = [
             'undefined' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -83,7 +83,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list no data' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2022T00:00:00&dateto=27/08/2022T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2022T00:00:00&dateto=27/08/2022T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -97,7 +97,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list bad date' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10230&type=2&datefrom=29/08/2022T00:00:00&dateto=27/08/2022T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=2&datefrom=29/08/2022T00:00:00&dateto=27/08/2022T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -111,7 +111,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list no param' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -122,7 +122,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list no db' => [
-                'url' => 'http://localhost/crud/api/pippo/dati_acquisiti?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/pippo/dati_acquisiti?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -133,7 +133,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list bad table' => [
-                'url' => 'http://localhost/crud/api/sscp/pippo?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/pippo?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -144,7 +144,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list no table' => [
-                'url' => 'http://localhost/crud/api/sscp?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -155,7 +155,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list no check' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10.4&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10.4&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -166,7 +166,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list param error' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?variabile=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?variabile=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -177,7 +177,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list no enum' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10230&type=9999&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=9999&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -188,7 +188,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list no smalldate' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2099T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2099T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -199,7 +199,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list bad date format' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10230&type=2&datefrom=27-08-2017T00:00:00&dateto=27/08/2017T01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=2&datefrom=27-08-2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -210,7 +210,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'list bad datetime format' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2017+00:00:00&dateto=27/08/2017+01:00:00',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2017+00:00:00&dateto=27/08/2017+01:00:00',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -221,7 +221,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'read standard' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700160',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/101700160',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -237,14 +237,14 @@ class IndexTest extends TestCase
                                 "valore": "1.779999971389771",
                                 "data_e_ora": "01/04/2019 06:16:00",
                                 "tipo_dato": "2",
-                                "link": "/sscp/dati_acquisiti/101700160"
+                                "link": "/h1/sscp/dati_acquisiti/101700160"
                             }
                         ]
                     }
                 }'
             ],
             'read not exist' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/999999999999',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/999999999999',
                 'params' => null,
                 'json' => false,
                 'method' => 'GET',
@@ -258,7 +258,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'create standard' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti',
                 'params' => [
                     "var" => 10230,
                     "type" => 2,
@@ -272,12 +272,12 @@ class IndexTest extends TestCase
                     "method": "create",
                     "response": {
                         "message": "Record @id@ inserito con successo",
-                        "link": "/sscp/dati_acquisiti/@id@"
+                        "link": "/h1/sscp/dati_acquisiti/@id@"
                     }
                 }'
             ],
             'create no param' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti',
                 'params' => [
                     "type" => 2,
                     "date" => "01/01/2021",
@@ -292,7 +292,7 @@ class IndexTest extends TestCase
                 }'
             ],
             'update put' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700161?val=1.9&date=02/01/2020',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/101700161?val=1.9&date=02/01/2020',
                 'params' => null,
                 'json' => false,
                 'method' => 'PUT',
@@ -301,12 +301,12 @@ class IndexTest extends TestCase
                     "method": "update",
                     "response": {
                         "message": "Record 101700161 aggiornato con successo",
-                        "link": "/sscp/dati_acquisiti/101700161"
+                        "link": "/h1/sscp/dati_acquisiti/101700161"
                     }
                 }'
             ],
             'update patch' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700161?val=0.3&date=03/01/2020',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/101700161?val=0.3&date=03/01/2020',
                 'params' => null,
                 'json' => false,
                 'method' => 'PATCH',
@@ -315,12 +315,12 @@ class IndexTest extends TestCase
                     "method": "update",
                     "response": {
                         "message": "Record 101700161 aggiornato con successo",
-                        "link": "/sscp/dati_acquisiti/101700161"
+                        "link": "/h1/sscp/dati_acquisiti/101700161"
                     }
                 }'
             ],
             'delete standard' => [
-                'url' => 'http://localhost/crud/api/sscp/dati_acquisiti/@id@',
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/@id@',
                 'params' => null,
                 'json' => false,
                 'method' => 'DELETE',

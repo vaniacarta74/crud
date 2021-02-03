@@ -22,7 +22,7 @@ class RouterTest extends TestCase
     
     protected function setUp()
     {
-        $path = 'http://localhost/crud/api/sscp/dati_acquisiti/4000000';
+        $path = 'http://localhost/crud/api/h1/sscp/dati_acquisiti/4000000';
         $method = 'GET';
         $this->router = new Router($path, $method);
     }
@@ -41,17 +41,18 @@ class RouterTest extends TestCase
         $data = [
             'read' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti/4000000',
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/4000000',
                     'method' => 'GET',
                     'input' => null
                 ],
                 'request' => [],
                 'expecteds' => [
                     'input' => null,
+                    'host' => 'h1',
                     'db' => 'SSCP_data',
                     'alias' => 'sscp',
                     'table' => 'dati_acquisiti',
-                    'resource' => '/sscp/dati_acquisiti',
+                    'resource' => '/h1/sscp/dati_acquisiti',
                     'id' => '4000000',
                     'queryType' => 'read',
                     'queryParams' => [
@@ -111,7 +112,7 @@ class RouterTest extends TestCase
             ],
             'list' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti',
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti',
                     'method' => 'GET',
                     'input' => null
                 ], 
@@ -128,10 +129,11 @@ class RouterTest extends TestCase
                         'datefrom' => '27/08/2017T00:00:00',
                         'dateto' => '27/08/2017T01:00:00'
                     ],
+                    'host' => 'h1',
                     'db' => 'SSCP_data',
                     'alias' => 'sscp',
                     'table' => 'dati_acquisiti',
-                    'resource' => '/sscp/dati_acquisiti',
+                    'resource' => '/h1/sscp/dati_acquisiti',
                     'id' => null,
                     'queryType' => 'list',
                     'queryParams' => [
@@ -250,7 +252,7 @@ class RouterTest extends TestCase
             ],
             'create' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti',
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti',
                     'method' => 'POST',
                     'input' => __DIR__ . '/../providers/phpInput.json'
                 ], 
@@ -262,10 +264,11 @@ class RouterTest extends TestCase
                         'date' => '01/01/2021',
                         'val' => 3.5
                     ],
+                    'host' => 'h1',
                     'db' => 'SSCP_data',
                     'alias' => 'sscp',
                     'table' => 'dati_acquisiti',
-                    'resource' => '/sscp/dati_acquisiti',
+                    'resource' => '/h1/sscp/dati_acquisiti',
                     'id' => null,
                     'queryType' => 'create',
                     'queryParams' => [                        
@@ -369,7 +372,7 @@ class RouterTest extends TestCase
             ],
             'update put' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700175',
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/101700175',
                     'method' => 'PUT',
                     'input' => null
                 ], 
@@ -382,10 +385,11 @@ class RouterTest extends TestCase
                         'val' => 1.9,                    
                         'date' => '02/01/2020'
                     ],
+                    'host' => 'h1',
                     'db' => 'SSCP_data',
                     'alias' => 'sscp',
                     'table' => 'dati_acquisiti',
-                    'resource' => '/sscp/dati_acquisiti',
+                    'resource' => '/h1/sscp/dati_acquisiti',
                     'id' => '101700175',
                     'queryType' => 'update',
                     'queryParams' => [                        
@@ -506,7 +510,7 @@ class RouterTest extends TestCase
             ],
             'update patch' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700175',
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/101700175',
                     'method' => 'PATCH',
                     'input' => null
                 ], 
@@ -519,10 +523,11 @@ class RouterTest extends TestCase
                         'val' => 1.9,                    
                         'date' => '02/01/2020'
                     ],
+                    'host' => 'h1',
                     'db' => 'SSCP_data',
                     'alias' => 'sscp',
                     'table' => 'dati_acquisiti',
-                    'resource' => '/sscp/dati_acquisiti',
+                    'resource' => '/h1/sscp/dati_acquisiti',
                     'id' => '101700175',
                     'queryType' => 'update',
                     'queryParams' => [                        
@@ -643,17 +648,18 @@ class RouterTest extends TestCase
             ],
             'delete' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti/101700184',
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/101700184',
                     'method' => 'DELETE',
                     'input' => null
                 ], 
                 'request' => null,
                 'expecteds' => [
                     'input' => null,
+                    'host' => 'h1',
                     'db' => 'SSCP_data',
                     'alias' => 'sscp',
                     'table' => 'dati_acquisiti',
-                    'resource' => '/sscp/dati_acquisiti',
+                    'resource' => '/h1/sscp/dati_acquisiti',
                     'id' => '101700184',
                     'queryType' => 'delete',
                     'queryParams' => [                        
@@ -700,6 +706,7 @@ class RouterTest extends TestCase
         Reflections::invokeConstructor($this->router, $args);
         
         $actual['input'] = Reflections::getProperty($this->router, 'input');
+        $actual['host'] = Reflections::getProperty($this->router, 'host');
         $actual['db'] = Reflections::getProperty($this->router, 'db');
         $actual['alias'] = Reflections::getProperty($this->router, 'alias');
         $actual['table'] = Reflections::getProperty($this->router, 'table');
@@ -721,7 +728,7 @@ class RouterTest extends TestCase
         $data = [
             'exception' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti',
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti',
                     'method' => 'GET',
                     'input' => null
                 ]    
@@ -825,12 +832,80 @@ class RouterTest extends TestCase
      * @group router
      * @coversNothing
      */
+    public function setHostProvider()
+    {
+        $data = [
+            'h1' => [
+                'args' => [
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti',
+                ],
+                'expected' => 'h1'
+            ],
+            'h2' => [
+                'args' => [
+                    'path' => 'http://localhost/crud/api/h2/sscp/dati_acquisiti',
+                ],
+                'expected' => 'h2'
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group router
+     * @covers \vaniacarta74\Crud\Router::setHost
+     * @dataProvider setHostProvider
+     */
+    public function testSetHostEquals($args, $expected)
+    {
+        Reflections::invokeMethod($this->router, 'setHost', $args);
+        
+        $actual = Reflections::getProperty($this->router, 'host');
+        
+        $this->assertEquals($expected, $actual);         
+    } 
+    
+    /**
+     * @group router
+     * @covers \vaniacarta74\Crud\Router::setHost
+     */
+    public function testSetHostException()
+    {
+        $args = [          
+            'path' => 'http://localhost/crud/api/pippo/sscp/scarichi',
+        ];
+        
+        $this->setExpectedException('Exception');
+        
+        Reflections::invokeMethod($this->router, 'setHost', $args);
+    }
+    
+    /**
+     * @group router
+     * @covers \vaniacarta74\Crud\Router::setHost
+     */
+    public function testSetHostStringException()
+    {
+        $args = [          
+            'path' => [],
+        ];
+        
+        $this->setExpectedException('Exception');
+        
+        Reflections::invokeMethod($this->router, 'setHost', $args);
+    }
+    
+    /**
+     * @group router
+     * @coversNothing
+     */
     public function setDbProvider()
     {
         $data = [
             'sscp' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti',
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti',
                     'routes' => [
                         'SSCP_data' => [
                             'alias' => 'sscp'
@@ -844,7 +919,7 @@ class RouterTest extends TestCase
             ],
             'spt' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/spt/dati_acquisiti',
+                    'path' => 'http://localhost/crud/api/h1/spt/dati_acquisiti',
                     'routes' => [
                         'SPT' => [
                             'alias' => 'spt'
@@ -858,7 +933,7 @@ class RouterTest extends TestCase
             ],
             'dbutz' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/utz/utenti',
+                    'path' => 'http://localhost/crud/api/h1/utz/utenti',
                     'routes' => [
                         'dbutz' => [
                             'alias' => 'utz'
@@ -872,7 +947,7 @@ class RouterTest extends TestCase
             ],
             'dbcore' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/core/scarichi',
+                    'path' => 'http://localhost/crud/api/h1/core/scarichi',
                     'routes' => [
                         'dbcore' => [
                             'alias' => 'core'
@@ -886,7 +961,7 @@ class RouterTest extends TestCase
             ],
             'dbumd' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/umd/scarichi',
+                    'path' => 'http://localhost/crud/api/h1/umd/scarichi',
                     'routes' => [
                         'dbumd' => [
                             'alias' => 'umd'
@@ -947,7 +1022,7 @@ class RouterTest extends TestCase
         $data = [
             'sscp' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti',
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti',
                     'routes' => [
                         'SSCP_data' => [
                             'tables' => [
@@ -964,7 +1039,7 @@ class RouterTest extends TestCase
             ],
             'spt' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/spt/dati_acquisiti',
+                    'path' => 'http://localhost/crud/api/h1/spt/dati_acquisiti',
                     'routes' => [
                         'SPT' => [
                             'tables' => [
@@ -981,7 +1056,7 @@ class RouterTest extends TestCase
             ],
             'dbutz' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/utz/utenti',
+                    'path' => 'http://localhost/crud/api/h1/utz/utenti',
                     'routes' => [
                         'dbutz' => [
                             'tables' => [
@@ -998,7 +1073,7 @@ class RouterTest extends TestCase
             ],
             'dbcore' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/core/scarichi',
+                    'path' => 'http://localhost/crud/api/h1/core/scarichi',
                     'routes' => [
                         'dbcore' => [
                             'tables' => [
@@ -1015,7 +1090,7 @@ class RouterTest extends TestCase
             ],
             'dbumd' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/umd/richieste',
+                    'path' => 'http://localhost/crud/api/h1/umd/richieste',
                     'routes' => [
                         'dbumd' => [
                             'tables' => [
@@ -1058,7 +1133,7 @@ class RouterTest extends TestCase
     public function testSetTableException()
     {
         $args = [          
-            'path' => 'http://localhost/crud/api/core/pippo',
+            'path' => 'http://localhost/crud/api/h1/core/pippo',
             'routes' => [
                 'dbcore' => [
                     'tables' => [
@@ -1082,12 +1157,14 @@ class RouterTest extends TestCase
      */
     public function testSetResourceEquals()
     {
+        $host = 'h1';
         $db = 'SSCP_data';
         $alias = 'sscp';
         $table = 'dati_acquisiti';
         $args = [];
-        $expected = '/sscp/dati_acquisiti';
+        $expected = '/h1/sscp/dati_acquisiti';
         
+        Reflections::setProperty($this->router, 'host', $host);
         Reflections::setProperty($this->router, 'db', $db);
         Reflections::setProperty($this->router, 'alias', $alias);
         Reflections::setProperty($this->router, 'table', $table);
@@ -1105,11 +1182,13 @@ class RouterTest extends TestCase
      */
     public function testSetResourceException()
     {
+        $host = 'h1';
         $db = 'SSCP_data';
         $alias = null;
         $table = null;
         $args = [];
         
+        Reflections::setProperty($this->router, 'host', $host);
         Reflections::setProperty($this->router, 'db', $db);
         Reflections::setProperty($this->router, 'alias', $alias);
         Reflections::setProperty($this->router, 'table', $table);
@@ -1128,16 +1207,18 @@ class RouterTest extends TestCase
         $data = [
             'with id' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti/123456789'                    
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/123456789'                    
                 ],
+                'host' => 'h1',
                 'alias' => 'sscp',
                 'table' => 'dati_acquisiti',
                 'expected' => '123456789'
             ],
             'without id' => [
                 'args' => [
-                    'path' => 'http://localhost/crud/api/sscp/dati_acquisiti'                    
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti'                    
                 ],
+                'host' => 'h1',
                 'alias' => 'sscp',
                 'table' => 'dati_acquisiti',
                 'expected' => null
@@ -1152,8 +1233,9 @@ class RouterTest extends TestCase
      * @covers \vaniacarta74\Crud\Router::setId
      * @dataProvider setIdProvider
      */
-    public function testSetIdEquals($args, $alias, $table, $expected)
+    public function testSetIdEquals($args, $host, $alias, $table, $expected)
     {
+        Reflections::setProperty($this->router, 'host', $host);
         Reflections::setProperty($this->router, 'alias', $alias);
         Reflections::setProperty($this->router, 'table', $table);
         
@@ -1170,12 +1252,14 @@ class RouterTest extends TestCase
      */
     public function testSetIdException()
     {
+        $host = 'topolino';
         $alias = 'pippo';
         $table = 'pluto';
         $args = [
-            'path' => 'http://localhost/crud/api/sscp/dati_acquisiti/123456789'
+            'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/123456789'
         ];
         
+        Reflections::setProperty($this->router, 'host', $host);
         Reflections::setProperty($this->router, 'alias', $alias);
         Reflections::setProperty($this->router, 'table', $table);
         

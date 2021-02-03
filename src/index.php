@@ -14,8 +14,8 @@ header("Content-Type: application/json; charset=UTF-8");
 
 try {
 //    $varId = isset($_GET['id']) ? '&id=' . $_GET['id'] : null;
-//    $taditional = 'src/index.php?db=' . $_GET['db'] . '&table=' . $_GET['table'] . $varId . '&';
-//    $restful = 'api/' . $_GET['db'] . '/' . $_GET['table'] . (isset($varId) ? '/' . $_GET['id'] : null) . '?';
+//    $taditional = 'src/index.php?host=' . $_GET['host'] . '&db=' . $_GET['db'] . '&table=' . $_GET['table'] . $varId . '&';
+//    $restful = 'api/' . $_GET['host'] . '/' . $_GET['db'] . '/' . $_GET['table'] . (isset($varId) ? '/' . $_GET['id'] : null) . '?';
 //    $url = str_replace($taditional, $restful, $_SERVER['REQUEST_URI']);
 //    $method = 'GET';
     
@@ -25,6 +25,7 @@ try {
     $path = strtok($url, '?');
     
     $router = new Router($path, $method);
+    $host = $router->getHost();
     $dbName = $router->getDb();
     $resource = $router->getResource();
     $queryParams = $router->getQueryParams();
@@ -34,7 +35,7 @@ try {
     $purgedQuery = $validator->getPurgedQuery();
     $validParams = $validator->getValidParams();
     
-    $results = DbWrapper::dateTime($dbName, $purgedQuery, $validParams);
+    $results = DbWrapper::dateTime($host, $dbName, $purgedQuery, $validParams);
     
     $responder = new Responder($resource, $results);
     $response = $responder->getResponse();

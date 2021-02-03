@@ -19,6 +19,7 @@ use vaniacarta74\Crud\Error;
 class Router extends Accessor
 {
     protected $input;
+    protected $host;
     protected $db;
     protected $alias;
     protected $table;
@@ -40,6 +41,7 @@ class Router extends Accessor
             $this->setInput($input);            
             $strJson = @file_get_contents(__DIR__ . '/json/routes.json');
             $routes = json_decode($strJson, true);
+            $this->setHost($path);
             $this->setDb($path, $routes);
             $this->setTable($path, $routes);
             $this->setResource();
@@ -75,6 +77,30 @@ class Router extends Accessor
                 $input = $post ? json_decode($post, true) : null;
             }            
             $this->input = $input;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param string $path
+     * @throws \Exception
+     */
+    private function setHost($path)
+    {
+        try {
+            if (!is_string($path)) {
+                throw new \Exception('Formato parametro non corretto');
+            }
+            if (strpos($path, 'h1')) {
+                $host = 'h1';
+            } elseif (strpos($path, 'h2')) {
+                $host = 'h2';
+            } else {
+                throw new \Exception('Host non definito');
+            }
+            $this->host = $host;                    
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
@@ -145,8 +171,8 @@ class Router extends Accessor
     private function setResource()
     {
         try {
-            if (isset($this->alias) && isset($this->table)) {
-                $resource = '/' . $this->alias . '/' . $this->table;
+            if (isset($this->host) && isset($this->alias) && isset($this->table)) {
+                $resource = '/' . $this->host . '/' . $this->alias . '/' . $this->table;
             } else {
                 throw new \Exception('Risorsa non definibile.');
             }
@@ -164,7 +190,7 @@ class Router extends Accessor
     private function setId($path)
     {
         try {
-            $baseRegex = $this->alias . '\/' . $this->table;
+            $baseRegex = $this->host . '\/' . $this->alias . '\/' . $this->table;
             if (preg_match('/' . $baseRegex  . '$/', $path)) {
                 $this->id = null;
             } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches)) {

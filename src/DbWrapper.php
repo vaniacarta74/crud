@@ -24,19 +24,51 @@ class DbWrapper
     private static $dbToWrap = ['SPT'];
     
     /**
+     * @param string $host
+     * @param string $dbName
+     * @param string/null $driver
+     * @return \vaniacarta74\Crud\db
+     * @throws \Exception
+     */
+    public static function dbBuilder($host, $dbName, $driver = null)
+    {
+        try {
+            if (!is_string($host) || !is_string($dbName)) {
+                throw new \Exception('Formato parametri non valido');
+            }
+            $dbDriver = (isset($driver) && !in_array($driver, array('dblib', 'mssql', 'sqlsrv'))) ? $driver : 'dblib';
+            if ($host === 'h2') {
+                $dbHost = MSSQL_HOST2;
+                $dbUser = MSSQL_USER2;
+                $dbPassword = MSSQL_PASSWORD2;
+            } else {
+                $dbHost = MSSQL_HOST;
+                $dbUser = MSSQL_USER;
+                $dbPassword = MSSQL_PASSWORD;
+            }            
+            $db = new db($dbName, $dbDriver, $dbHost, $dbUser, $dbPassword);            
+            return $db;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    } 
+    
+    /**
+     * @param string $host
      * @param string $dbName
      * @param array $query
      * @param array $params
      * @return array
      * @throws \PDOException
      */
-    public static function dateTime($dbName, $query, $params)
+    public static function dateTime($host, $dbName, $query, $params)
     {
         try {
-            if (!is_string($dbName) || !is_array($query) || !is_array($params)) {
+            if (!is_string($host) || !is_string($dbName) || !is_array($query) || !is_array($params)) {
                 throw new \Exception('Formato parametri non valido');
             }
-            $db = new db($dbName);
+            $db = self::dbBuilder($host, $dbName);
             $wrappedParams = self::setDateTimeParams($dbName, $params);
             $results = $db->run($query, $wrappedParams);
             $wrappedResults = self::setDateTimeResults($dbName, $query, $results);
