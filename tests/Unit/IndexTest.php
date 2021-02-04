@@ -9,7 +9,7 @@
 namespace vaniacarta74\Crud\tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use vaniacarta74\Crud\tests\classes\Curl;
+use vaniacarta74\Crud\Curl;
 
 /**
  * Description of IndexTest
@@ -60,7 +60,7 @@ class IndexTest extends TestCase
     {
         $expected = __DIR__ . '/../providers/' . $provider;
         
-        $actual = Curl::run($url, $params, $json, $method);
+        $actual = Curl::run($url, $method, $params, $json);
         
         $this->assertJsonStringEqualsJsonFile($expected, $actual);             
     }
@@ -356,7 +356,7 @@ class IndexTest extends TestCase
             $expected = $rawExpected;
         }
         
-        $actual = Curl::run($url, $params, $json, $method);
+        $actual = Curl::run($url, $method, $params, $json);
         
         $this->assertJsonStringEqualsJsonString($expected, $actual);
         

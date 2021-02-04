@@ -64,6 +64,8 @@ class Router extends Accessor
         try {
             if (count($_GET) > 0) {
                 $input = $_GET;
+            } elseif (count($_POST) > 0) {
+                $input = $_POST;
             } else {
                 if (isset($phpInput)) {
                     if (file_exists($phpInput)) {
@@ -75,7 +77,7 @@ class Router extends Accessor
                     $post = @file_get_contents('php://input');
                 }
                 $input = $post ? json_decode($post, true) : null;
-            }            
+            }
             $this->input = $input;
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());

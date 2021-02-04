@@ -12,7 +12,7 @@ use vaniacarta74\Crud\Router;
 use vaniacarta74\Crud\tests\classes\Reflections;
 
 /**
- * Description of CurlTest
+ * Description of RouterTest
  *
  * @author Vania
  */
@@ -764,6 +764,7 @@ class RouterTest extends TestCase
                     'input' => null
                 ],
                 'get' => [],
+                'post' => [],
                 'expecteds' => null
             ],
             'get' => [
@@ -774,16 +775,36 @@ class RouterTest extends TestCase
                     'var' => 10230,
                     'val' => 1.9 
                 ],
+                'post' => [],
                 'expecteds' => [
                     'var' => 10230,
                     'val' => 1.9 
                 ]
             ],
-            'post' => [
+            'post json' => [
                 'args' => [
                     'input' => __DIR__ . '/../providers/phpInput.json'
                 ],
                 'get' => [],
+                'post' => [],
+                'expecteds' => [
+                    'var' => 10230,
+                    'type' => 2,
+                    'date' => '01/01/2021',
+                    'val' => 3.5
+                ]
+            ],
+            'post' => [
+                'args' => [
+                    'input' => null
+                ],
+                'get' => [],
+                'post' => [
+                    'var' => 10230,
+                    'type' => 2,
+                    'date' => '01/01/2021',
+                    'val' => 3.5
+                ],
                 'expecteds' => [
                     'var' => 10230,
                     'type' => 2,
@@ -801,9 +822,10 @@ class RouterTest extends TestCase
      * @covers \vaniacarta74\Crud\Router::setInput
      * @dataProvider setInputProvider
      */
-    public function testSetInputEquals($args, $get, $expected)
+    public function testSetInputEquals($args, $get, $post, $expected)
     {
         $_GET = $get;
+        $_POST = $post;
         
         Reflections::invokeMethod($this->router, 'setInput', $args);
         
@@ -819,6 +841,7 @@ class RouterTest extends TestCase
     public function testSetInputException()
     {
         $_GET = [];
+        $_POST = [];
         $args = [
             'input' => __DIR__ . '/pippo.json'
         ];
