@@ -98,7 +98,7 @@ class UtilityTest extends TestCase
      */
     public function testCallbackObjectEqualsWithDelta()  
     {        
-        $path = 'http://localhost/crud/api/sscp/dati_acquisiti/4000000';
+        $path = 'http://localhost/crud/api/h1/sscp/dati_acquisiti/4000000';
         $method = 'GET';
         $object = new Router($path, $method);
         $method = 'getTable';

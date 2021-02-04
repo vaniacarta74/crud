@@ -26,6 +26,7 @@ class DbWrapperTest extends TestCase
     {
         $data = [
             'read' => [
+                'host' => 'h1',
                 'dbName' => 'SPT',
                 'purgedQuery' => [
                     'fields' => [
@@ -105,6 +106,7 @@ class DbWrapperTest extends TestCase
                 ]    
             ],
             'list' => [
+                'host' => 'h1',
                 'dbName' => 'SPT',                
                 'purgedQuery' => [
                     'fields' => [
@@ -282,6 +284,7 @@ class DbWrapperTest extends TestCase
                 ]    
             ],
             'create' => [
+                'host' => 'h1',
                 'dbname' => 'SPT',
                 'purgedQuery' => [                        
                     'table' => 'dati_acquisiti',
@@ -407,6 +410,7 @@ class DbWrapperTest extends TestCase
                 ]    
             ],
             'update' => [
+                'host' => 'h1',
                 'dbName' => 'SPT',
                 'purgedQuery' => [                        
                     'table' => 'dati_acquisiti',
@@ -503,6 +507,7 @@ class DbWrapperTest extends TestCase
                 ]    
             ],
             'delete' => [
+                'host' => 'h1',
                 'dbName' => 'SPT',
                 'purgedQuery' => [                        
                     'table' => 'dati_acquisiti',
@@ -554,7 +559,7 @@ class DbWrapperTest extends TestCase
      * @covers \vaniacarta74\Crud\DbWrapper::dateTime
      * @dataProvider dateTimeProvider
      */
-    public function testDateTimeEquals($dbName, $purgedQuery, $validParams, $expected)
+    public function testDateTimeEquals($host, $dbName, $purgedQuery, $validParams, $expected)
     {
         $jsonId = file_get_contents(__DIR__ . '/../providers/wrapper.json');
         $arrJson = json_decode($jsonId, true);
@@ -570,7 +575,7 @@ class DbWrapperTest extends TestCase
             $expected['id'] = str_replace('@id@', $newId, $expected['id']);
         }
         
-        $actual = DbWrapper::dateTime($dbName, $purgedQuery, $validParams);
+        $actual = DbWrapper::dateTime($host, $dbName, $purgedQuery, $validParams);
         
         $this->assertEquals($expected, $actual);
         
@@ -587,6 +592,7 @@ class DbWrapperTest extends TestCase
     {
         $data = [
             'pdo' => [
+                'host' => 'h1',
                 'dbname' => 'SPT',
                 'query' => [
                     'fields' => [
@@ -632,17 +638,26 @@ class DbWrapperTest extends TestCase
                     ]
                 ]
             ],
-            'no string' => [
+            'no string host' => [
+                'host' => [],
+                'dbname' => 'SPT',
+                'query' => [],
+                'params' => []
+            ],
+            'no string db' => [
+                'host' => 'h1',
                 'dbname' => [],
                 'query' => [],
                 'params' => []
             ],
             'no array query' => [
+                'host' => 'h1',
                 'dbname' => 'SPT',
                 'query' => 'pippo',
                 'params' => []
             ],
             'no array params' => [
+                'host' => 'h1',
                 'dbname' => 'SPT',
                 'query' => [],
                 'params' => 'pippo'
@@ -657,11 +672,11 @@ class DbWrapperTest extends TestCase
      * @covers \vaniacarta74\Crud\DbWrapper::dateTime
      * @dataProvider dateTimeExceptionProvider
      */
-    public function testDateTimeException($dbName, $purgedQuery, $validParams)
+    public function testDateTimeException($host, $dbName, $purgedQuery, $validParams)
     {
         $this->setExpectedException('Exception');
         
-        DbWrapper::dateTime($dbName, $purgedQuery, $validParams);
+        DbWrapper::dateTime($host, $dbName, $purgedQuery, $validParams);
     }
     
     /**
@@ -2315,5 +2330,89 @@ class DbWrapperTest extends TestCase
         $this->setExpectedException('Exception');
         
         DbWrapper::changeDateTimeResults($dateTimeFields, $results, $isTimeZoned);
+    }
+    
+    /**
+     * @group dbWrapper
+     * @coversNothing
+     */
+    public function dbBuilderProvider()
+    {
+        $data = [
+            'standard' => [
+                'host' => 'h1',
+                'dbName' => 'SPT',
+                'driver' => 'dblib'
+            ],
+            'driver null' => [
+                'host' => 'h1',
+                'dbName' => 'SPT',
+                'driver' => null
+            ],
+            'h2' => [
+                'host' => 'h2',
+                'dbName' => 'SPT',
+                'driver' => 'dblib'
+            ],
+            'driver mssql' => [
+                'host' => 'h2',
+                'dbName' => 'SPT',
+                'driver' => 'mssql'
+            ],
+            'driver sqlsrv' => [
+                'host' => 'h2',
+                'dbName' => 'SPT',
+                'driver' => 'sqlsrv'
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group dbWrapper
+     * @covers \vaniacarta74\Crud\DbWrapper::dbBuilder
+     * @dataProvider dbBuilderProvider
+     */
+    public function testDbBuilderEquals($host, $dbName, $driver)
+    {
+        $actual = DbWrapper::dbBuilder($host, $dbName, $driver);
+        
+        $this->assertInstanceOf('\vaniacarta74\Crud\Db', $actual);
+        
+    }
+    
+    /**
+     * @group dbWrapper
+     * @coversNothing
+     */
+    public function dbBuilderExceptionProvider()
+    {
+        $data = [
+            'no string host' => [
+                'host' => [],
+                'dbName' => 'SPT',
+                'driver' => 'dblib'
+            ],
+            'no string dbName' => [
+                'host' => 'h1',
+                'dbName' => [],
+                'driver' => 'dblib'
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group dbWrapper
+     * @covers \vaniacarta74\Crud\DbWrapper::dbBuilder
+     * @dataProvider dbBuilderExceptionProvider
+     */
+    public function testDbBuilderException($host, $dbName, $driver)
+    {
+        $this->setExpectedException('Exception');
+        
+        DbWrapper::dbBuilder($host, $dbName, $driver);
     }
 }

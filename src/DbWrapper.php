@@ -27,7 +27,7 @@ class DbWrapper
      * @param string $host
      * @param string $dbName
      * @param string/null $driver
-     * @return \vaniacarta74\Crud\db
+     * @return \vaniacarta74\Crud\Db
      * @throws \Exception
      */
     public static function dbBuilder($host, $dbName, $driver = null)
@@ -36,7 +36,7 @@ class DbWrapper
             if (!is_string($host) || !is_string($dbName)) {
                 throw new \Exception('Formato parametri non valido');
             }
-            $dbDriver = (isset($driver) && !in_array($driver, array('dblib', 'mssql', 'sqlsrv'))) ? $driver : 'dblib';
+            $dbDriver = (isset($driver) && in_array($driver, array('dblib', 'mssql', 'sqlsrv'))) ? $driver : 'dblib';
             if ($host === 'h2') {
                 $dbHost = MSSQL_HOST2;
                 $dbUser = MSSQL_USER2;
@@ -46,7 +46,7 @@ class DbWrapper
                 $dbUser = MSSQL_USER;
                 $dbPassword = MSSQL_PASSWORD;
             }            
-            $db = new db($dbName, $dbDriver, $dbHost, $dbUser, $dbPassword);            
+            $db = new Db($dbName, $dbDriver, $dbHost, $dbUser, $dbPassword);            
             return $db;
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
