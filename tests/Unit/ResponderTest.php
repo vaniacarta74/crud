@@ -940,11 +940,6 @@ class ResponderTest extends TestCase
         $data = [
             'no array records' => [
                 'records' => ''
-            ],
-            'no array records id' => [
-                'records' => [
-                    'pippo' => []
-                ]    
             ]
         ];
         

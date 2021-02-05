@@ -23,6 +23,7 @@
     "dbcore": {
         "alias": "core",
         "tables": [
+            "variabili_sync",
             "scarichi",
             "formule"
         ]

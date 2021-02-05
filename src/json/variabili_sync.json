@@ -1,0 +1,39 @@
+{
+    "list": {
+        "fields": [],
+        "table": "variabili_sync",
+        "where": {
+            "and" : [
+                {
+                    "field": "variabile_scarico",
+                    "operator": "=",
+                    "value": {
+                        "param": "var",
+                        "bind": ":vScarico",
+                        "type": "int",
+                        "null": false,
+                        "check": {
+                            "type": "integer",
+                            "params": []
+                        }
+                    }
+                }
+            ]        
+        },
+        "order": [
+            {
+                "field": "variabile_scarico",
+                "type": "asc"
+            },
+            {
+                "field": "db",
+                "type": "asc"
+            },
+            {
+                "field": "variabile",
+                "type": "asc"
+            }
+        ]           
+    }
+}
+

@@ -1831,6 +1831,24 @@ class RouterTest extends TestCase
     
     /**
      * @group router
+     * @covers \vaniacarta74\Crud\Router::setQueryParams
+     */
+    public function testSetQueryParamsMethodException()
+    {
+        $args = [];
+        $table = 'variabili_sync';
+        $queryType = 'read';
+        
+        Reflections::setProperty($this->router, 'table', $table);
+        Reflections::setProperty($this->router, 'queryType', $queryType);
+        
+        $this->setExpectedException('Exception');
+        
+        Reflections::invokeMethod($this->router, 'setQueryParams', $args);        
+    }
+    
+    /**
+     * @group router
      * @coversNothing
      */
     public function setUrlParamsProvider()

@@ -168,8 +168,6 @@ class Responder extends Accessor
                 $linked[$nRecord] = $record;
                 if (array_key_exists('id', $record)) {
                     $linked[$nRecord]['link'] = $this->setLink($record['id']);
-                } else {
-                    throw new \Exception('Proprietà records senza id');
                 }
             }
             $this->records = $linked;
@@ -222,9 +220,4 @@ class Responder extends Accessor
             throw $e;
         }
     }
-    
-//    public function getResponse()
-//    {
-//        return $this->response;
-//    }
 }

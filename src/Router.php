@@ -260,9 +260,13 @@ class Router extends Accessor
             }
             $strJson = @file_get_contents($path);
             $params = json_decode($strJson, true);
-            $queryParams = $params[$this->queryType];
-            $queryParams['type'] = $this->queryType;
-            $this->queryParams = $queryParams;
+            if (array_key_exists($this->queryType, $params)) {
+                $queryParams = $params[$this->queryType];
+                $queryParams['type'] = $this->queryType;
+                $this->queryParams = $queryParams;
+            } else {
+                throw new \Exception('Metodo HTTP non contemplato per questa tabella');
+            }
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
