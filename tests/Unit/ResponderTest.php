@@ -41,6 +41,43 @@ class ResponderTest extends TestCase
     public function constructorProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'resource' => '/h1/core/variabili_sync',
+                    'results' => [                    
+                        'type' => 'all',
+                        'records' => [
+                            0 => [
+                                'n_record' => '44'
+                            ]
+                        ],
+                        'id' => null                    
+                    ] 
+                ],
+                'expected' => [
+                    'type' => 'all',
+                    'records' => [
+                        0 => [
+                            'n_record' => '44'
+                        ]
+                    ],
+                    'id' => null,
+                    'count' => 1,
+                    'resource' => '/h1/core/variabili_sync',
+                    'response' => [
+                        'ok' => true,
+                        'method' => 'all',
+                        'response' => [
+                            'message' => 'Numero record caricati: 1',
+                            'records' => [
+                                0 => [
+                                    'n_record' => '44'
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ],
             'read' => [
                 'args' => [
                     'resource' => '/h1/spt/dati_acquisiti',
@@ -281,6 +318,20 @@ class ResponderTest extends TestCase
     public function setIdProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'results' => [                    
+                        'type' => 'all',
+                        'records' => [
+                            0 => [
+                                'n_record' => '44'
+                            ]
+                        ],
+                        'id' => null                    
+                    ] 
+                ],
+                'expected' => null
+            ],
             'read' => [
                 'args' => [
                     'results' => [                    
@@ -399,6 +450,24 @@ class ResponderTest extends TestCase
     public function setRecordsProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'results' => [                    
+                        'type' => 'all',
+                        'records' => [
+                            0 => [
+                                'n_record' => '44'
+                            ]
+                        ],
+                        'id' => null                    
+                    ] 
+                ],
+                'expected' => [
+                    0 => [
+                        'n_record' => '44'
+                    ]
+                ]
+            ],
             'read' => [
                 'args' => [
                     'results' => [                    
@@ -533,6 +602,20 @@ class ResponderTest extends TestCase
     public function setTypeProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'results' => [                    
+                        'type' => 'all',
+                        'records' => [
+                            0 => [
+                                'n_record' => '44'
+                            ]
+                        ],
+                        'id' => null                    
+                    ] 
+                ],
+                'expected' => 'all'
+            ],
             'read' => [
                 'args' => [
                     'results' => [                    
@@ -966,6 +1049,29 @@ class ResponderTest extends TestCase
     public function setResponseProvider()
     {
         $data = [
+            'all' => [
+                'type' => 'all',
+                'records' => [
+                    0 => [
+                        'n_record' => '44'
+                    ]
+                ],
+                'id' => null,
+                'count' => 1,                
+                'resource' => '/h1/core/variabili_sync',                
+                'expected' => [
+                    "ok" => true,
+                    "method" => "all",
+                    "response" => [
+                        "message" => "Numero record caricati: 1",
+                        "records" => [
+                            0 => [
+                                'n_record' => '44'
+                            ]
+                        ]
+                    ]
+                ]
+            ],
             'read standard' => [
                 'type' => 'read',
                 'records' => [

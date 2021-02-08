@@ -24,6 +24,7 @@
         "alias": "core",
         "tables": [
             "variabili_sync",
+            "variabili_sync_all",
             "scarichi",
             "formule"
         ]

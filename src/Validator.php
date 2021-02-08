@@ -53,7 +53,7 @@ class Validator extends Accessor
     private function setRawParams($queryParams) 
     {
         try {
-            if (!is_array($queryParams) || !key_exists('type', $queryParams) || !in_array($queryParams['type'], array('list', 'read', 'create', 'update', 'delete'))) {
+            if (!is_array($queryParams) || !key_exists('type', $queryParams) || !in_array($queryParams['type'], array('all', 'list', 'read', 'create', 'update', 'delete'))) {
                 throw new \Exception('Tipo operazione non definito correttamente');
             }
             $type = $queryParams['type'];
@@ -100,6 +100,25 @@ class Validator extends Accessor
             $params = $queryParams['where'];
             $rawParams = [];
             $this->goWhereDeep($rawParams, $params);            
+            return $rawParams;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }        
+    }
+    
+    /**
+     * @param array $queryParams
+     * @return array
+     * @throws \Exception
+     */
+    private function getAllParams($queryParams) 
+    {
+        try {
+            if (!is_array($queryParams)) {
+                throw new \Exception('Clausola where non definita correttamente');
+            }
+            $rawParams = [];
             return $rawParams;
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
@@ -282,7 +301,7 @@ class Validator extends Accessor
     private function purgeQuery($queryParams) 
     {
         try {
-            if (!is_array($queryParams) || !key_exists('type', $queryParams) || !in_array($queryParams['type'], array('list', 'read', 'create', 'update', 'delete'))) {
+            if (!is_array($queryParams) || !key_exists('type', $queryParams) || !in_array($queryParams['type'], array('all', 'list', 'read', 'create', 'update', 'delete'))) {
                 throw new \Exception('Tipo operazione non definito correttamente');
             }
             $type = $queryParams['type'];
@@ -293,7 +312,7 @@ class Validator extends Accessor
                 case 'update':
                     $this->purgedQuery = $this->purgeType('set', $queryParams);
                     break;
-                default:
+               default:
                     $this->purgedQuery = $queryParams;
                     break;
             }

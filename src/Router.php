@@ -195,7 +195,7 @@ class Router extends Accessor
             $baseRegex = $this->host . '\/' . $this->alias . '\/' . $this->table;
             if (preg_match('/' . $baseRegex  . '$/', $path)) {
                 $this->id = null;
-            } elseif (preg_match('/' . $baseRegex  . '\/([0-9]+)$/', $path, $matches)) {
+            } elseif (preg_match('/' . $baseRegex  . '\/(all|ALL|[0-9]+)$/', $path, $matches)) {
                 $this->id = $matches[1];
             } else {
                 throw new \Exception('Id non definito correttamente.');
@@ -217,7 +217,7 @@ class Router extends Accessor
             if (isset($this->id)) {
                 switch ($method) {
                     case 'GET':
-                        $queryType = 'read';
+                        $queryType = (strtoupper($this->id) === 'ALL') ? 'all' : 'read';
                         break;
                     case 'PUT':
                     case 'PATCH':
@@ -286,6 +286,7 @@ class Router extends Accessor
                     $urlParams = $this->input;
                     //$urlParams = $_GET;
                     break;
+                case 'all':                   
                 case 'read':
                 case 'delete':
                     $urlParams['id'] = $this->id;

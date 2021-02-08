@@ -63,6 +63,33 @@ class ValidatorTest extends TestCase
     public function constructorProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'queryParams' => [
+                        'fields' => [],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [],
+                        'type' => 'all'
+                    ],
+                    'urlParams' => [
+                        'id' => 'ALL'
+                    ]
+                ],
+                'expecteds' => [
+                    'rawParams' => [],
+                    'completeParams' => [],
+                    'validParams' => [],
+                    'binders' => [],
+                    'purgedQuery' => [
+                        'fields' => [],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [],
+                        'type' => 'all'
+                    ]
+                ]    
+            ],
             'read' => [
                 'args' => [
                     'queryParams' => [
@@ -1495,6 +1522,20 @@ class ValidatorTest extends TestCase
     public function setRawParamsProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'queryParams' => [
+                        'fields' => [],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [],
+                        'type' => 'all'
+                    ]                    
+                ],
+                'expecteds' => [
+                    'rawParams' => []
+                ]    
+            ],
             'read' => [
                 'args' => [
                     'queryParams' => [
@@ -2186,6 +2227,71 @@ class ValidatorTest extends TestCase
         $this->setExpectedException('Exception');
         
         Reflections::invokeMethod($this->validator, 'setRawParams', $args);
+    }
+    
+    /**
+     * @group validator
+     * @coversNothing
+     */
+    public function getAllParamsProvider()
+    {
+        $data = [
+            'all' => [
+                'args' => [
+                    'queryParams' => [
+                        'fields' => [],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [],
+                        'type' => 'all'
+                    ]                    
+                ],
+                'expecteds' => []    
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group validator
+     * @covers \vaniacarta74\Crud\Validator::getAllParams
+     * @dataProvider getAllParamsProvider
+     */
+    public function testGetAllParamsEquals($args, $expected)
+    {
+        $actual = Reflections::invokeMethod($this->validator, 'getAllParams', $args);
+        
+        $this->assertEquals($expected, $actual);         
+    }
+    
+    /**
+     * @group validator
+     * @coversNothing
+     */
+    public function getAllParamsExceptionProvider()
+    {
+        $data = [
+            'no array' => [
+                'args' => [
+                    'queryParams' => 'pippo'
+                ]
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group validator
+     * @covers \vaniacarta74\Crud\Validator::getAllParams
+     * @dataProvider getAllParamsExceptionProvider
+     */
+    public function testGetAllParamsException($args)
+    {
+        $this->setExpectedException('Exception');
+        
+        Reflections::invokeMethod($this->validator, 'getAllParams', $args);
     }
     
     /**
@@ -3390,6 +3496,17 @@ class ValidatorTest extends TestCase
     public function setCompleteParamsProvider()
     {
         $data = [
+            'all' => [
+                'rawParams' => [],
+                'args' => [
+                    'urlParams' => [
+                        'id' => 'ALL'
+                    ]                   
+                ],
+                'expecteds' => [
+                    'completeParams' => []
+                ]    
+            ],
             'read' => [
                 'rawParams' => [
                     0 => [
@@ -3981,6 +4098,13 @@ class ValidatorTest extends TestCase
     public function setValidParamsProvider()
     {
         $data = [
+            'all' => [
+                'completeParams' => [],
+                'expecteds' => [
+                    'binders' => [],
+                    'validParams' => []
+                ]    
+            ],
             'read' => [
                 'completeParams' => [
                     0 => [
@@ -4508,6 +4632,27 @@ class ValidatorTest extends TestCase
     public function purgeQueryProvider()
     {
         $data = [
+            'all' => [
+                'binders' => [],
+                'args' => [
+                    'queryParams' => [
+                        'fields' => [],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [],
+                        'type' => 'all'
+                    ]                    
+                ],
+                'expecteds' => [
+                    'purgedQuery' => [
+                        'fields' => [],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [],
+                        'type' => 'all'
+                    ]
+                ]    
+            ],
             'read' => [
                 'binders' => [
                     0 => 'id_dato'

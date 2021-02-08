@@ -119,6 +119,33 @@ class DbTest  extends TestCase
     public function runProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'purgedQuery' => [
+                        'fields' => [
+                            0 => [
+                                'name' => 'COUNT(*)',
+                                'alias' => 'n_record',
+                                'type' => 'integer'
+                            ]
+                        ],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [],
+                        'type' => 'all'
+                    ],
+                    'bindParams' => []
+                ],
+                'expected' => [                    
+                    'type' => 'all',
+                    'records' => [
+                        0 => [
+                            'n_record' => '44'
+                        ]
+                    ],
+                    'id' => null                    
+                ]
+            ],
             'read' => [
                 'args' => [
                     'purgedQuery' => [
@@ -673,6 +700,11 @@ class DbTest  extends TestCase
             $expected['id'] = str_replace('@id@', $newId, $expected['id']);
         }
         
+        if ($method === 'all') {
+            $this->db = New Db('dbcore');
+        } else {
+            $this->db = New Db('SPT');
+        }
         $actual = Reflections::invokeMethod($this->db, 'run', $args);
         
         $this->assertEquals($expected, $actual); 
@@ -815,6 +847,18 @@ class DbTest  extends TestCase
     public function assembleProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'purgedQuery' => [
+                        'fields' => [],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [],
+                        'type' => 'all'
+                    ]
+                ],
+                'expected' => 'SELECT * FROM variabili_sync;'
+            ],
             'read' => [
                 'args' => [
                     'purgedQuery' => [
@@ -1193,6 +1237,95 @@ class DbTest  extends TestCase
         $this->setExpectedException('Exception');
         
         Reflections::invokeMethod($this->db, 'assemble', $args);
+    }
+    
+    /**
+     * @group db
+     * @coversNothing
+     */
+    public function prepareAllProvider()
+    {
+        $data = [
+            'standard' => [
+                'args' => [
+                    'purgedQuery' => [
+                        'fields' => [],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [],
+                        'type' => 'all'
+                    ]
+                ],
+                'expected' => 'SELECT * FROM variabili_sync;'
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group db
+     * @covers \vaniacarta74\Crud\Db::prepareAll
+     * @dataProvider prepareAllProvider
+     */
+    public function testPrepareAllEquals($args, $expected)
+    {
+        $actual = Reflections::invokeMethod($this->db, 'prepareAll', $args);
+        
+        $this->assertEquals($expected, $actual);         
+    }
+    
+    /**
+     * @group db
+     * @coversNothing
+     */
+    public function prepareAllExceptionProvider()
+    {
+        $data = [            
+            'no array query' => [
+                'args' => [
+                    'query' => 'pippo',
+                ]
+            ],
+            'no query fields' => [
+                'args' => [
+                    'query' => [
+                        'table' => [],
+                        'order' => []
+                    ]
+                ]
+            ],
+            'no query table' => [
+                'args' => [
+                    'query' => [
+                        'fields' => [],
+                        'order' => []
+                    ]
+                ]
+            ],
+            'no query order' => [
+                'args' => [
+                    'query' => [
+                        'fields' => [],
+                        'table' => []
+                    ]
+                ]
+            ]   
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group db
+     * @covers \vaniacarta74\Crud\Db::prepareAll
+     * @dataProvider prepareAllExceptionProvider
+     */
+    public function testPrepareAllException($args)
+    {
+        $this->setExpectedException('Exception');
+        
+        Reflections::invokeMethod($this->db, 'prepareAll', $args);
     }
     
     /**
@@ -3493,6 +3626,9 @@ class DbTest  extends TestCase
     public function prepareProvider()
     {
         $data = [
+            'all' => [
+                'query' => 'SELECT * FROM variabili_sync;'
+            ],
             'read' => [
                 'query' => 'SELECT id_dato AS id, variabile, valore, CONVERT(varchar, data_e_ora, 20) AS data_e_ora, tipo_dato FROM dati_acquisiti WHERE (id_dato = :id_dato);'
             ],
@@ -3564,6 +3700,12 @@ class DbTest  extends TestCase
     public function setIdProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'bindParams' => []
+                ],
+                'expected' => null
+            ],
             'read' => [
                 'args' => [
                     'bindParams' => [
@@ -3835,6 +3977,12 @@ class DbTest  extends TestCase
     public function bindProvider()
     {
         $data = [
+            'all' => [
+                'query' => 'SELECT * FROM variabili_sync;',
+                'args' => [
+                    'bindParams' => []
+                ]
+            ],
             'read' => [
                 'query' => 'SELECT id_dato AS id, variabile, valore, CONVERT(varchar, data_e_ora, 20) AS data_e_ora, tipo_dato FROM dati_acquisiti WHERE (id_dato = :id_dato);',
                 'args' => [
@@ -4131,6 +4279,13 @@ class DbTest  extends TestCase
     public function execProvider()
     {
         $data = [
+            'all' => [
+                'method' => 'all',
+                'query' => 'SELECT * FROM variabili_sync;',
+                'params' => [
+                    'bindParams' => []
+                ]
+            ],
             'read' => [
                 'method' => 'read',
                 'query' => 'SELECT id_dato AS id, variabile, valore, CONVERT(varchar, data_e_ora, 20) AS data_e_ora, tipo_dato FROM dati_acquisiti WHERE (id_dato = :id_dato);',
@@ -4352,6 +4507,12 @@ class DbTest  extends TestCase
             $params['bindParams'][0]['value'] = str_replace('@id@', $newId, $params['bindParams'][0]['value']);
         }
         
+        if ($method === 'all') {
+            $this->db = New Db('dbcore');
+        } else {
+            $this->db = New Db('SPT');
+        }
+        
         Reflections::setProperty($this->db, 'query', $query);
         Reflections::invokeMethod($this->db, 'connect');
         Reflections::invokeMethod($this->db, 'prepare');
@@ -4417,6 +4578,23 @@ class DbTest  extends TestCase
     public function getResultsProvider()
     {
         $data = [
+            'all' => [
+                'method' => 'all',
+                'query' => 'SELECT COUNT(*) AS n_record FROM variabili_sync;',
+                'params' => [
+                    'bindParams' => []
+                ],
+                'id' => null,
+                'expected' => [                    
+                    'type' => 'all',
+                    'records' => [
+                        0 => [
+                            'n_record' => '44'
+                        ]
+                    ],
+                    'id' => null                   
+                ]
+            ],
             'read' => [
                 'method' => 'read',
                 'query' => 'SELECT id_dato AS id, variabile, valore, CONVERT(varchar, data_e_ora, 20) AS data_e_ora, tipo_dato FROM dati_acquisiti WHERE (id_dato = :id_dato);',
@@ -4691,6 +4869,12 @@ class DbTest  extends TestCase
             $expected['id'] = str_replace('@id@', $newId, $expected['id']);
         }
         
+        if ($method === 'all') {
+            $this->db = New Db('dbcore');
+        } else {
+            $this->db = New Db('SPT');
+        }
+        
         Reflections::setProperty($this->db, 'queryType', $method);
         Reflections::setProperty($this->db, 'query', $query);
         Reflections::setProperty($this->db, 'id', $id);
@@ -4714,6 +4898,19 @@ class DbTest  extends TestCase
     public function goProvider()
     {
         $data = [
+            'all' => [
+                'method' => 'all',
+                'query' => 'SELECT COUNT(*) AS n_record FROM variabili_sync;',
+                'expected' => [                    
+                    'type' => 'list',
+                    'records' => [
+                        0 => [
+                            'n_record' => '44'
+                        ]
+                    ],
+                    'id' => null                    
+                ]
+            ],
             'read' => [
                 'method' => 'read',
                 'query' => 'SELECT id_dato AS id, variabile, valore, CONVERT(varchar, data_e_ora, 20) AS data_e_ora, tipo_dato FROM dati_acquisiti WHERE (id_dato = 97047202);',
@@ -4800,6 +4997,12 @@ class DbTest  extends TestCase
             $expected['id'] = str_replace('@id@', $newId, $expected['id']);
         }
         
+        if ($method === 'all') {
+            $this->db = New Db('dbcore');
+        } else {
+            $this->db = New Db('SPT');
+        }
+        
         $actual = Reflections::invokeMethod($this->db, 'go', array($query));
         
         $this->assertEquals($expected, $actual); 
@@ -4845,6 +5048,10 @@ class DbTest  extends TestCase
     public function checkQueryProvider()
     {
         $data = [
+            'all' => [
+                'query' => 'SELECT * FROM variabili_sync;',
+                'expected' => 'list'
+            ],
             'read' => [
                 'query' => 'SELECT id_dato AS id, variabile, valore, CONVERT(varchar, data_e_ora, 20) AS data_e_ora, tipo_dato FROM dati_acquisiti WHERE (id_dato = 97047202);',
                 'expected' => 'list'
@@ -4929,6 +5136,9 @@ class DbTest  extends TestCase
     public function queryProvider()
     {
         $data = [
+            'all' => [
+                'query' => 'SELECT * FROM variabili_sync;'
+            ],
             'read' => [
                 'query' => 'SELECT id_dato AS id, variabile, valore, CONVERT(varchar, data_e_ora, 20) AS data_e_ora, tipo_dato FROM dati_acquisiti WHERE (id_dato = 97047202);'
             ],
@@ -4963,6 +5173,12 @@ class DbTest  extends TestCase
         
         if ($method === 'delete') {            
             $query = str_replace('@id@', $newId, $query);
+        }
+        
+        if ($method === 'all') {
+            $this->db = New Db('dbcore');
+        } else {
+            $this->db = New Db('SPT');
         }
         
         Reflections::invokeMethod($this->db, 'connect');
@@ -5056,7 +5272,7 @@ class DbTest  extends TestCase
         Reflections::setProperty($this->db, 'query', $query);        
         Reflections::invokeMethod($this->db, 'connect');
         Reflections::invokeMethod($this->db, 'query');
-        //var_dump($this->db);
+        
         $actual = Reflections::invokeMethod($this->db, 'fetch', array($style));
         
         $this->assertEquals($expected, $actual);

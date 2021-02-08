@@ -25,6 +25,33 @@ class DbWrapperTest extends TestCase
     public function dateTimeProvider()
     {
         $data = [
+            'all' => [
+                'host' => 'h1',
+                'dbName' => 'dbcore',
+                'purgedQuery' => [
+                    'fields' => [
+                        0 => [
+                            'name' => 'COUNT(*)',
+                            'alias' => 'n_record',
+                            'type' => 'integer'
+                        ]
+                    ],
+                    'table' => 'variabili_sync',
+                    'where' => [],
+                    'order' => [],
+                    'type' => 'all'
+                ],
+                'validParams' => [],
+                'expecteds' => [                    
+                    'type' => 'all',
+                    'records' => [
+                        0 => [
+                            'n_record' => '44',
+                        ]
+                    ],
+                    'id' => null                    
+                ]    
+            ],
             'read' => [
                 'host' => 'h1',
                 'dbName' => 'SPT',
@@ -1257,6 +1284,40 @@ class DbWrapperTest extends TestCase
     public function setDateTimeResultsProvider()
     {
         $data = [
+            'all' => [
+                'dbName' => 'dbcore',
+                'purgedQuery' => [
+                    'fields' => [
+                        0 => [
+                            'name' => 'COUNT(*)',
+                            'alias' => 'n_record',
+                            'type' => 'integer'
+                        ]
+                    ],
+                    'table' => 'variabili_sync',
+                    'where' => [],
+                    'order' => [],
+                    'type' => 'all'
+                ],
+                'results' => [                    
+                    'type' => 'all',
+                    'records' => [
+                        0 => [
+                            'n_record' => '44'
+                        ]
+                    ],
+                    'id' => null                    
+                ],
+                'expecteds' => [                    
+                    'type' => 'all',
+                    'records' => [
+                        0 => [
+                            'n_record' => '44'
+                        ]
+                    ],
+                    'id' => null                    
+                ]    
+            ],
             'read' => [
                 'dbName' => 'SPT',
                 'purgedQuery' => [
@@ -1708,6 +1769,16 @@ class DbWrapperTest extends TestCase
         $data = [
             'read' => [
                 'purgedQuery' => [
+                    'fields' => [],
+                    'table' => 'variabili_sync',
+                    'where' => [],
+                    'order' => [],
+                    'type' => 'all'
+                ],
+                'expecteds' => []    
+            ],
+            'read' => [
+                'purgedQuery' => [
                     'fields' => [
                         0 => [
                             'name' => 'id_dato',
@@ -2109,6 +2180,36 @@ class DbWrapperTest extends TestCase
     public function changeDateTimeResultsProvider()
     {
         $data = [
+            'all zoned' => [
+                'dateTimeFields' => [
+                    0 => 'data_e_ora'
+                ],
+                'results' => [                    
+                    'type' => 'all',
+                    'records' => [
+                        0 => [
+                            'variabile' => '82025',
+                            'valore' => '0',
+                            'data_e_ora' => '28/10/2018 00:00:00',
+                            'tipo_dato' => '2'
+                        ]
+                    ],
+                    'id' => null                  
+                ],
+                'isTimeZoned' => true,
+                'expecteds' => [                    
+                    'type' => 'all',
+                    'records' => [
+                        0 => [
+                            'variabile' => '82025',
+                            'valore' => '0',
+                            'data_e_ora' => '28/10/2018 01:00:00',
+                            'tipo_dato' => '2'
+                        ]
+                    ],
+                    'id' => null                    
+                ]    
+            ],
             'read zoned' => [
                 'dateTimeFields' => [
                     0 => 'data_e_ora'

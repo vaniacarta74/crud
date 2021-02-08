@@ -39,6 +39,47 @@ class RouterTest extends TestCase
     public function constructorProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'path' => 'http://localhost/crud/api/h1/core/variabili_sync/ALL',
+                    'method' => 'GET',
+                    'input' => null
+                ],
+                'request' => [],
+                'expecteds' => [
+                    'input' => null,
+                    'host' => 'h1',
+                    'db' => 'dbcore',
+                    'alias' => 'core',
+                    'table' => 'variabili_sync',
+                    'resource' => '/h1/core/variabili_sync',
+                    'id' => 'ALL',
+                    'queryType' => 'all',
+                    'queryParams' => [
+                        'fields' => [],
+                        'table' => 'variabili_sync',
+                        'where' => [],
+                        'order' => [
+                            0 => [
+                                "field" => "variabile_scarico",
+                                "type" => "asc"
+                            ],
+                            1 => [
+                                "field" => "db",
+                                "type" => "asc"
+                            ],
+                            2 => [
+                                "field" => "variabile",
+                                "type" => "asc"
+                            ]
+                        ],
+                        'type' => 'all'
+                    ],
+                    'urlParams' => [
+                        'id' => 'ALL'
+                    ]
+                ]    
+            ],
             'read' => [
                 'args' => [
                     'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/4000000',
@@ -1228,6 +1269,15 @@ class RouterTest extends TestCase
     public function setIdProvider()
     {
         $data = [
+            'with ALL' => [
+                'args' => [
+                    'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/ALL'                    
+                ],
+                'host' => 'h1',
+                'alias' => 'sscp',
+                'table' => 'dati_acquisiti',
+                'expected' => 'ALL'
+            ],
             'with id' => [
                 'args' => [
                     'path' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/123456789'                    
@@ -1298,6 +1348,13 @@ class RouterTest extends TestCase
     public function setQueryTypeProvider()
     {
         $data = [
+            'all' => [
+                'args' => [
+                    'method' => 'GET'                    
+                ],
+                'id' => 'ALL',
+                'expected' => 'all'
+            ],
             'read' => [
                 'args' => [
                     'method' => 'GET'                    
@@ -1386,6 +1443,31 @@ class RouterTest extends TestCase
     public function setQueryParamsProvider()
     {
         $data = [
+            'all' => [
+                'args' => [],
+                'table' => 'variabili_sync',
+                'queryType' => 'all',
+                'expected' => [
+                    'fields' => [],
+                    'table' => 'variabili_sync',
+                    'where' => [],
+                    'order' => [
+                        0 => [
+                            "field" => "variabile_scarico",
+                            "type" => "asc"
+                        ],
+                        1 => [
+                            "field" => "db",
+                            "type" => "asc"
+                        ],
+                        2 => [
+                            "field" => "variabile",
+                            "type" => "asc"
+                        ]
+                    ],
+                    'type' => 'all'
+                ]
+            ],
             'read' => [
                 'args' => [],
                 'table' => 'dati_acquisiti',
@@ -1854,6 +1936,15 @@ class RouterTest extends TestCase
     public function setUrlParamsProvider()
     {
         $data = [
+            'all' => [
+                'args' => [],
+                'id' => 'ALL',
+                'input' => [],
+                'queryType' => 'all',
+                'expected' => [
+                    'id' => 'ALL'
+                ]
+            ],
             'list' => [
                 'args' => [],
                 'id' => null,

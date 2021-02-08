@@ -31,7 +31,8 @@ class Accessor
                     throw new \Exception('Nome metodo accessorio errato');
                     break;
             }
-            if ($response) {
+            //if ($response) {
+            if (isset($response) && $response !== false) {
                 return $response;
             } else {
                 throw new \Exception('Funzione inesistente');

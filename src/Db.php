@@ -129,7 +129,7 @@ class Db
     public function assemble($queryParams)
     {
         try {
-            if (!is_array($queryParams) || !array_key_exists('type', $queryParams) || !in_array($queryParams['type'], array('read', 'list', 'create', 'update', 'delete'))) {
+            if (!is_array($queryParams) || !array_key_exists('type', $queryParams) || !in_array($queryParams['type'], array('all', 'read', 'list', 'create', 'update', 'delete'))) {
                 throw new \PDOException('Formato parametri, struttura o tipo elaborazione non valida');
             }
             $this->queryType = $queryParams['type'];
@@ -201,6 +201,30 @@ class Db
             $order = $this->setOrder($queryParams['order']);
             
             $rawQuery = 'SELECT ' . $fields . ' FROM ' . $table . (isset($where) ? ' WHERE ' . $where : null) . (isset($order) ? ' ORDER BY ' . $order : null) . ';';
+            
+            return $rawQuery;
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param array $queryParams
+     * @return string
+     * @throws \Exception
+     */
+    private function prepareAll($queryParams)
+    {
+        try {
+            if (!is_array($queryParams) || !array_key_exists('fields', $queryParams) || !array_key_exists('table', $queryParams) || !array_key_exists('order', $queryParams)) {
+                throw new \Exception('Formato parametri, struttura o tipo elaborazione non valida');
+            }
+            $fields = $this->setSelectFields($queryParams['fields']);
+            $table = $this->setTable($queryParams['table']);
+            $order = $this->setOrder($queryParams['order']);
+            
+            $rawQuery = 'SELECT ' . $fields . ' FROM ' . $table . (isset($order) ? ' ORDER BY ' . $order : null) . ';';
             
             return $rawQuery;
         } catch (\Exception $e) {
@@ -661,7 +685,7 @@ class Db
     {
         try {
             $response['type'] = $this->queryType;
-            if ($this->queryType === 'list' || $this->queryType === 'read') {
+            if ($this->queryType === 'list' || $this->queryType === 'read' || $this->queryType === 'all') {
                 $response['records'] = $this->fetch();
             } elseif ($this->queryType === 'create') {
                 $this->id = $this->pdo->lastInsertId();

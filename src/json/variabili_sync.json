@@ -34,6 +34,24 @@
                 "type": "asc"
             }
         ]           
+    },
+    "all": {
+        "fields": [],
+        "table": "variabili_sync",
+        "where": [],
+        "order": [
+            {
+                "field": "variabile_scarico",
+                "type": "asc"
+            },
+            {
+                "field": "db",
+                "type": "asc"
+            },
+            {
+                "field": "variabile",
+                "type": "asc"
+            }
+        ]           
     }
 }
-

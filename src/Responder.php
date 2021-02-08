@@ -191,6 +191,10 @@ class Responder extends Accessor
                     $response['response']['message'] = 'Record ' . $this->id . ' inserito con successo';
                     $response['response']['link'] = $this->setLink($this->id);
                     break;
+                case 'all':
+                    $response['response']['message'] = 'Numero record caricati: ' . $this->count;                    
+                    $response['response']['records'] = $this->records;
+                    break;
                 case 'list':
                     if (count($this->records) === 0) {
                         $response['response']['message'] = 'Nessun record trovato per i parametri indicati';
