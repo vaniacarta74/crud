@@ -62,7 +62,7 @@
                 },
                 {
                     "field": "data_e_ora",
-                    "operator": ">=",
+                    "operator": ">",
                     "value": {
                         "param": "datefrom",
                         "bind": ":dataIniziale",

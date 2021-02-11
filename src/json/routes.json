@@ -3,14 +3,14 @@
         "alias": "sscp",
         "tables": [
             "dati_acquisiti",
-            "variabili"
+            "vista_variabili_maxdata"
         ]
     },
     "SPT": {
         "alias": "spt",
         "tables": [
             "dati_acquisiti",
-            "variabili"
+            "vista_variabili_maxdata"
         ]
     },
     "dbutz": {
@@ -24,7 +24,6 @@
         "alias": "core",
         "tables": [
             "variabili_sync",
-            "variabili_sync_all",
             "scarichi",
             "formule"
         ]

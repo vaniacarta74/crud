@@ -2,12 +2,17 @@
     "list": {
         "fields": [
             {
-                "name": "db + '.' + CAST(variabile AS varchar) + '.' + CAST(tipo_dato AS varchar)",
-                "alias": "codice",
+                "name": "codice",
+                "alias": null,
                 "type": "string"
+            },
+            {
+                "name": "data_e_ora",
+                "alias": null,
+                "type": "dateTime"
             }
         ],
-        "table": "variabili_sync",
+        "table": "vista_variabili_maxdata",
         "where": {
             "and" : [
                 {
@@ -16,34 +21,34 @@
                     "value": {
                         "param": "var",
                         "bind": ":codice",
-                        "type": "string",
+                        "type": "str",
                         "null": false,
                         "check": {
-                            "type": "string",
+                            "type": "integer",
                             "params": []
                         }
                     }
                 }
             ]        
         },
-        "order": [
-            {
-                "field": "codice",
-                "type": "asc"
-            }
-        ]           
+        "order": []           
     },
     "all": {
         "fields": [
             {
-                "name": "db + '.' + CAST(variabile AS varchar) + '.' + CAST(tipo_dato AS varchar)",
-                "alias": "codice",
+                "name": "codice",
+                "alias": null,
                 "type": "string"
+            },
+            {
+                "name": "data_e_ora",
+                "alias": null,
+                "type": "dateTime"
             }
         ],
-        "table": "variabili_sync",
+        "table": "vista_variabili_maxdata",
         "where": [],
-        "order": [            
+        "order": [
             {
                 "field": "codice",
                 "type": "asc"

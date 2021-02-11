@@ -274,7 +274,7 @@ class DbWrapper
             }
             $dateTimeFields = [];
             $type = $query['type'];
-            if ($type === 'list' || $type === 'read') {
+            if ($type === 'all' || $type === 'list' || $type === 'read') {
                 if (array_key_exists('fields', $query)) {
                     $fields = $query['fields'];
                     foreach ($fields as $nField => $field) {

@@ -25,6 +25,13 @@ class IndexTest extends TestCase
     public function indexJsonFileProvider()
     {
         $data = [
+            'all' => [
+                'url' => 'http://localhost/crud/api/h1/core/variabili_sync/ALL',
+                'params' => null,
+                'json' => false,
+                'method' => 'GET',
+                'provider' => 'varSyncAll.json'
+            ],
             'list datetime latin' => [
                 'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti?var=10230&type=2&datefrom=27/08/2017T00:00:00&dateto=27/08/2017T01:00:00',
                 'params' => null,
@@ -80,6 +87,17 @@ class IndexTest extends TestCase
                     "ok": false,
                     "codice errore": 400,
                     "descrizione errore": "Parametri url non presenti"
+                }'
+            ],
+            'no method' => [
+                'url' => 'http://localhost/crud/api/h1/sscp/dati_acquisiti/ALL',
+                'params' => null,
+                'json' => false,
+                'method' => 'GET',
+                'expected' => '{
+                    "ok": false,
+                    "codice errore": 400,
+                    "descrizione errore": "Metodo HTTP non definito per questa tabella"
                 }'
             ],
             'list no data' => [

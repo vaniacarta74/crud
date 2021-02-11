@@ -215,7 +215,7 @@ class Responder extends Accessor
                     $response['response']['message'] = 'Record ' . $this->id . ' cancellato con successo';
                     break;
                 default:
-                    throw new \Exception('Metodo non contemplato');
+                    throw new \Exception('Metodo non definito');
                     break;
             }
             $this->response = $response;

@@ -265,7 +265,7 @@ class Router extends Accessor
                 $queryParams['type'] = $this->queryType;
                 $this->queryParams = $queryParams;
             } else {
-                throw new \Exception('Metodo HTTP non contemplato per questa tabella');
+                throw new \Exception('Metodo HTTP non definito per questa tabella');
             }
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
