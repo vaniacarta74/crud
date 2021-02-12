@@ -56,20 +56,18 @@ class RouterTest extends TestCase
                     'id' => 'ALL',
                     'queryType' => 'all',
                     'queryParams' => [
-                        'fields' => [],
+                        'fields' => [
+                            [
+                                "name" => "db + '.' + CAST(variabile AS varchar) + '.' + CAST(tipo_dato AS varchar)",
+                                "alias" => "codice",
+                                "type" => "string"
+                            ]
+                        ],
                         'table' => 'variabili_sync',
                         'where' => [],
                         'order' => [
                             0 => [
-                                "field" => "variabile_scarico",
-                                "type" => "asc"
-                            ],
-                            1 => [
-                                "field" => "db",
-                                "type" => "asc"
-                            ],
-                            2 => [
-                                "field" => "variabile",
+                                "field" => "codice",
                                 "type" => "asc"
                             ]
                         ],
@@ -243,7 +241,7 @@ class RouterTest extends TestCase
                                 ],
                                 2 => [
                                     'field' => 'data_e_ora',
-                                    'operator' => '>=',
+                                    'operator' => '>',
                                     'value' => [
                                         'param' => 'datefrom',
                                         'bind' => ':dataIniziale',
@@ -1448,20 +1446,18 @@ class RouterTest extends TestCase
                 'table' => 'variabili_sync',
                 'queryType' => 'all',
                 'expected' => [
-                    'fields' => [],
+                    'fields' => [
+                        [
+                            "name" => "db + '.' + CAST(variabile AS varchar) + '.' + CAST(tipo_dato AS varchar)",
+                            "alias" => "codice",
+                            "type" => "string"
+                        ]
+                    ],
                     'table' => 'variabili_sync',
                     'where' => [],
                     'order' => [
                         0 => [
-                            "field" => "variabile_scarico",
-                            "type" => "asc"
-                        ],
-                        1 => [
-                            "field" => "db",
-                            "type" => "asc"
-                        ],
-                        2 => [
-                            "field" => "variabile",
+                            "field" => "codice",
                             "type" => "asc"
                         ]
                     ],
@@ -1593,7 +1589,7 @@ class RouterTest extends TestCase
                             ],
                             2 => [
                                 'field' => 'data_e_ora',
-                                'operator' => '>=',
+                                'operator' => '>',
                                 'value' => [
                                     'param' => 'datefrom',
                                     'bind' => ':dataIniziale',
