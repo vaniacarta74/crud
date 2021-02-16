@@ -8,12 +8,13 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
 try {
-    $distinct = Sync::getVarToSync();    
-    $maxData = Sync::getTargetAllMaxDates();
-    $distData = Sync::getTargetVarMaxDates($distinct, $maxData);
-    $newData = Sync::getSourceRecords($distData);
-    $resInsertData = Sync::insertTargetRecords($newData);
-    $response = Sync::setResponse($resInsertData);
+    $sync = new Sync();
+    $distinct = $sync->getVarToSync();
+    $maxData = $sync->getTargetAllMaxDates();
+    $distData = $sync->getTargetVarMaxDates($distinct, $maxData);
+    $newData = $sync->getSourceRecords($distData);
+    $resInsertData = $sync->insertTargetRecords($newData);
+    $response = $sync->setResponse($resInsertData);
     
     $code = $response['ok'] ? 200 : 400;
     http_response_code($code);

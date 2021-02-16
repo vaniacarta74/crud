@@ -15,7 +15,15 @@ namespace vaniacarta74\Crud;
  */
 class Sync
 {
-    public static function callCrudService($url, $method = null, $param = null, $isJson = null)
+    /**
+     * @param string $url
+     * @param string $method
+     * @param array $param
+     * @param boolean $isJson
+     * @return array
+     * @throws \Exception
+     */
+    public function callCrudService($url, $method = null, $param = null, $isJson = null)
     {
         try {
             $json = Curl::run($url, $method, $param, $isJson);
@@ -44,22 +52,35 @@ class Sync
         }
     }
     
-    public static function getVarToSync()
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getVarToSync()
     {
         try {
             try {
-                $resVarSync = Sync::callCrudService('http://localhost/crud/api/h1/core/variabili_sync/ALL');
-                $variabili = $resVarSync['records'];
-                $distinct[] = $variabili[0]['codice'];
-            } catch (\Exception $e) {
-                $variabili = [];
-                $distinct = [];
-            }
-            $maxId = count($variabili);
-            for ($i = 1; $i < $maxId; $i++) {        
-                if ($variabili[$i - 1]['codice'] !== $variabili[$i]['codice']) {
-                    $distinct[] = $variabili[$i]['codice'];
+                $resVarSync = $this->callCrudService('http://localhost/crud/api/h1/core/variabili_sync/ALL');
+                if (!array_key_exists('records', $resVarSync)) {
+                    throw new \Exception();
                 }
+            } catch (\Exception $e) {
+                $resVarSync = ['records' => []];
+            }  
+            $variabili = $resVarSync['records'];
+            $maxId = count($variabili);
+            if ($maxId > 0) {
+                if (!array_key_exists('codice', $variabili[0])) {
+                    throw new \Exception('Chiave codice non presente');
+                }
+                $distinct[] = $variabili[0]['codice'];
+                for ($i = 1; $i < $maxId; $i++) {        
+                    if ($variabili[$i - 1]['codice'] !== $variabili[$i]['codice']) {
+                        $distinct[] = $variabili[$i]['codice'];
+                    }
+                }                
+            } else {
+                $distinct = [];
             }
             return $distinct;
         } catch (\Exception $e) {
@@ -68,29 +89,37 @@ class Sync
         }
     }
     
-    public static function getTargetAllMaxDates()
+    public function getTargetAllMaxDates()
     {
         try {
             try {
-                $resSptMaxData = Sync::callCrudService('http://localhost/crud/api/h2/spt/vista_variabili_maxdata/ALL');                
+                $resSptMaxData = $this->callCrudService('http://localhost/crud/api/h2/spt/vista_variabili_maxdata/ALL');
+                if (!array_key_exists('records', $resSptMaxData)) {
+                    throw new \Exception();
+                }
             } catch (\Exception $e) {
                 $resSptMaxData['records'] = [];
             }
             try {
-                $resSscpMaxData = Sync::callCrudService('http://localhost/crud/api/h2/sscp/vista_variabili_maxdata/ALL');                
+                $resSscpMaxData = $this->callCrudService('http://localhost/crud/api/h2/sscp/vista_variabili_maxdata/ALL');
+                if (!array_key_exists('records', $resSscpMaxData)) {
+                    throw new \Exception();
+                }
             } catch (\Exception $e) {
                 $resSscpMaxData['records'] = [];
             }
             $maxData = array_merge($resSptMaxData['records'], $resSscpMaxData['records']); 
             
             return $maxData;
+        // @codeCoverageIgnoreStart
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
+        // @codeCoverageIgnoreEnd
     }
     
-    public static function getTargetVarMaxDates($distinct, $maxData)
+    public function getTargetVarMaxDates($distinct, $maxData)
     {
         try {            
             $j = 0;
@@ -98,9 +127,13 @@ class Sync
             $iMax = count($maxData);
             foreach ($distinct as $codice) {
                 for ($i = $j; $i < $iMax; $i++) {
-                    if ($codice === $maxData[$i]['codice']) {
-                        $distData[$codice] = $maxData[$i]['data_e_ora'];
-                        break;
+                    if (array_key_exists('codice', $maxData[$i]) && array_key_exists('data_e_ora', $maxData[$i])) {
+                        if ($codice === $maxData[$i]['codice']) {
+                            $distData[$codice] = $maxData[$i]['data_e_ora'];
+                            break;
+                        }
+                    } else {
+                        throw new \Exception('Chiavi codice o data_e_ora non presenti');
                     }
                 }
                 $j = $i;
@@ -112,7 +145,7 @@ class Sync
         }
     }
     
-    public static function getSourceRecords($distData)
+    public function getSourceRecords($distData)
     {
         try {            
             $newData = [];
@@ -124,21 +157,27 @@ class Sync
                 $data_iniziale = str_replace(' ', 'T', $data);
                 $data_finale = str_replace(' ', 'T', date('Y-m-d H:i:s'));                
                 try {
-                    $resNewData = Sync::callCrudService('http://localhost/crud/api/h1/' . $db . '/dati_acquisiti?var=' . $variabile . '&type=' . $tipo_dato . '&datefrom=' . $data_iniziale . '&dateto=' . $data_finale);
-                    $newData[$codice] = $resNewData['records'];                    
+                    $resNewData = $this->callCrudService('http://localhost/crud/api/h1/' . $db . '/dati_acquisiti?var=' . $variabile . '&type=' . $tipo_dato . '&datefrom=' . $data_iniziale . '&dateto=' . $data_finale);
+                    if (array_key_exists('records', $resNewData)) {
+                        $newData[$codice] = $resNewData['records'];
+                    } else {
+                        throw new \Exception();
+                    }                                        
                 } catch (\Exception $e) {
                     $newData[$codice] = [];
                     continue;
                 }
             }            
             return $newData;
+        // @codeCoverageIgnoreStart
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
+        // @codeCoverageIgnoreEnd
     }
     
-    public static function insertTargetRecords($newData)
+    public function insertTargetRecords($newData)
     {
         try {            
             $resInsertData = [];
@@ -157,7 +196,7 @@ class Sync
                         'val' => $fields['valore']
                     ];
                     try {
-                        Sync::callCrudService('http://localhost/crud/api/h2/' . $db . '/dati_acquisiti', 'POST', $params);
+                        $this->callCrudService('http://localhost/crud/api/h2/' . $db . '/dati_acquisiti', 'POST', $params);
                         $resInsertData[$codice]['inserted'] = $i;
                         $i++;
                     } catch (\Exception $e) {
@@ -168,13 +207,15 @@ class Sync
                 }      
             }
             return $resInsertData;
+        // @codeCoverageIgnoreStart
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
+        // @codeCoverageIgnoreEnd
     }
     
-    public static function setResponse($resInsertData)
+    public function setResponse($resInsertData)
     {
         try {
             $total = 0;
@@ -192,9 +233,11 @@ class Sync
                 $response['descrizione errore'] = 'Nessuna variabile da sincronizzare trovata';
             }            
             return $response;
+        // @codeCoverageIgnoreStart
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
+        // @codeCoverageIgnoreEnd
     }
 }
