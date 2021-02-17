@@ -1143,7 +1143,7 @@ class SyncTest extends TestCase
                 ],
                 'expected' => [
                     'ok' => true,
-                    'message' => 'Sincronizzazione ' . MSSQL_HOST . ' => ' . MSSQL_HOST2 . ' avvenuta con successo in: 19 sec. Record inseriti: 1',
+                    'message' => 'Sincronizzazione ' . MSSQL_HOST . ' => ' . MSSQL_HOST2 . ' avvenuta con successo in: % sec. Record inseriti: 1',
                     'variabili' => [
                         'SPT.100025.2' => 'records 1 | riusciti 1 | falliti 0',
                         'SSCP_data.10.2' => 'records 0 | riusciti 0 | falliti 0'
@@ -1168,10 +1168,212 @@ class SyncTest extends TestCase
      * @covers \vaniacarta74\Crud\Sync::setResponse
      * @dataProvider setResponseProvider     
      */
-    public function testSetResponseEquals($resInsertData, $expected)
+    public function testSetResponseEquals($resInsertData, $expecteds)
     {
-        $actual = $this->sync->setResponse($resInsertData);
+        $actuals = $this->sync->setResponse($resInsertData);
+        
+        foreach ($expecteds as $key => $responsePart) {
+            if ($key === 'message') {
+                $parts = explode('%', $responsePart);
+                foreach ($parts as $expected) {
+                    $actual = strpos($actuals[$key], $expected);
+                    $this->assertTrue(is_int($actual));
+                }
+            } else {
+                $this->assertEquals($responsePart, $actuals[$key]);
+            }
+        }        
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function getVariabiliProvider()
+    {
+        $data = [
+            'standard' => [
+                'url' => 'http://localhost/crud/api/h1/core/variabili_sync/ALL',
+                'method' => null,
+                'params' => null,
+                'json' => null,
+                'mockReturn' => [
+                    'message' => 'Numero record caricati: 2',
+                    'records' => [
+                        0 => [
+                            'codice' => 'SPT.9999.2'
+                        ],
+                        1 => [
+                            'codice' => 'SPT.99999.2'
+                        ]
+                    ]
+                ],
+                'expected' => [
+                    0 => [
+                        'codice' => 'SPT.9999.2'
+                    ],
+                    1 => [
+                        'codice' => 'SPT.99999.2'
+                    ]
+                ]
+            ],
+            'wrong response' => [
+                'url' => 'http://localhost/crud/api/h1/core/variabili_sync/ALL',
+                'method' => null,
+                'params' => null,
+                'json' => null,
+                'mockReturn' => [
+                    'message' => 'Numero record caricati: 2',
+                    'pippo' => [
+                        0 => [
+                            'codice' => 'SPT.9999.2'
+                        ],
+                        1 => [
+                            'codice' => 'SPT.99999.2'
+                        ]
+                    ]
+                ],
+                'expected' => []
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::getVariabili
+     * @dataProvider getVariabiliProvider     
+     */
+    public function testGetVariabiliEquals($rawUrl, $method, $params, $json, $mockReturn, $expected)
+    {
+        $stub = $this->getMockBuilder('\vaniacarta74\Crud\Sync')        
+                     ->setMethods(array('callCrudService'))
+                     ->getMock();
+        
+        $stub->expects($this->any())
+             ->method('callCrudService')
+             ->with($rawUrl, $method, $params, $json)
+             ->will($this->returnValue($mockReturn));
+        
+        $actual = $stub->getVariabili($rawUrl);
         
         $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function getVariabiliExceptionProvider()
+    {
+        $data = [            
+            'exception' => [
+                'url' => 'http://localhost/crud/api/h1/core/variabili_sync/ALL',
+                'method' => null,
+                'params' => null,
+                'json' => null,
+                'expected' => []
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::getVariabili
+     * @dataProvider getVariabiliExceptionProvider     
+     */
+    public function testGetVariabiliExceptionEquals($rawUrl, $method, $params, $json, $expected)
+    {
+        $stub = $this->getMockBuilder('\vaniacarta74\Crud\Sync')        
+                     ->setMethods(array('callCrudService'))
+                     ->getMock();
+        
+        $stub->expects($this->any())
+             ->method('callCrudService')
+             ->with($rawUrl, $method, $params, $json)
+             ->will($this->throwException(new \Exception()));
+        
+        $actual = $stub->getVariabili($rawUrl);
+        
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function getDistinctVarProvider()
+    {
+        $data = [
+            'standard' => [
+                'variabili' => [
+                    0 => [
+                        'codice' => 'SPT.9999.2'
+                    ],
+                    1 => [
+                        'codice' => 'SPT.99999.2'
+                    ]
+                ],
+                'expected' => [
+                    0 => 'SPT.9999.2',
+                    1 => 'SPT.99999.2'
+                ]
+            ],
+            'no variabili' => [
+                'variabili' => [],
+                'expected' => []
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::getDistinctVar
+     * @dataProvider getDistinctVarProvider     
+     */
+    public function testGetDistinctVarEquals($variabili, $expected)
+    {
+        $actual = $this->sync->getDistinctVar($variabili);
+        
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function getDistinctVarExceptionProvider()
+    {
+        $data = [            
+            'no codice key' => [
+                'variabili' => [
+                    0 => [
+                        'pippo' => 'SPT.9999.2'
+                    ],
+                    1 => [
+                        'codice' => 'SPT.99999.2'
+                    ]
+                ]
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::getDistinctVar
+     * @dataProvider getDistinctVarExceptionProvider     
+     */
+    public function testGetDistinctVarException($variabili)
+    {
+        $this->setExpectedException('Exception');
+        
+        $this->sync->getDistinctVar($variabili);
     }
 }

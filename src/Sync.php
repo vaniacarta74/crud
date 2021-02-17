@@ -15,6 +15,12 @@ namespace vaniacarta74\Crud;
  */
 class Sync
 {
+    const URLSOURCE = 'http://localhost/crud/api/h1';
+    const URLTARGET = 'http://localhost/crud/api/h2';
+    const URLALLSYNCVAR = 'http://localhost/crud/api/h1/core/variabili_sync/ALL';
+    const URLALLSPTMAXDATA = 'http://localhost/crud/api/h2/spt/vista_variabili_maxdata/ALL';
+    const URLALLSSCPMAXDATA = 'http://localhost/crud/api/h2/sscp/vista_variabili_maxdata/ALL';
+    
     /**
      * @param string $url
      * @param string $method
@@ -59,15 +65,52 @@ class Sync
     public function getVarToSync()
     {
         try {
+            $variabili = $this->getVariabili(self::URLALLSYNCVAR);            
+            $distinct = $this->getDistinctVar($variabili);            
+            return $distinct;
+        // @codeCoverageIgnoreStart
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+        // @codeCoverageIgnoreEnd
+    }
+    
+    /**
+     * @param string $url
+     * @return array
+     * @throws \Exception
+     */
+    public function getVariabili($url)
+    {
+        try {
             try {
-                $resVarSync = $this->callCrudService('http://localhost/crud/api/h1/core/variabili_sync/ALL');
-                if (!array_key_exists('records', $resVarSync)) {
+                $result = $this->callCrudService($url);
+                if (array_key_exists('records', $result)) {
+                    $variabili = $result['records'];
+                } else {
                     throw new \Exception();
                 }
             } catch (\Exception $e) {
-                $resVarSync = ['records' => []];
-            }  
-            $variabili = $resVarSync['records'];
+                $variabili = [];
+            }            
+            return $variabili;
+        // @codeCoverageIgnoreStart
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+        // @codeCoverageIgnoreEnd
+    }
+    
+    /**
+     * @param array $variabili
+     * @return array
+     * @throws \Exception
+     */    
+    public function getDistinctVar($variabili)
+    {
+        try {
             $maxId = count($variabili);
             if ($maxId > 0) {
                 if (!array_key_exists('codice', $variabili[0])) {
@@ -89,27 +132,16 @@ class Sync
         }
     }
     
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function getTargetAllMaxDates()
     {
         try {
-            try {
-                $resSptMaxData = $this->callCrudService('http://localhost/crud/api/h2/spt/vista_variabili_maxdata/ALL');
-                if (!array_key_exists('records', $resSptMaxData)) {
-                    throw new \Exception();
-                }
-            } catch (\Exception $e) {
-                $resSptMaxData['records'] = [];
-            }
-            try {
-                $resSscpMaxData = $this->callCrudService('http://localhost/crud/api/h2/sscp/vista_variabili_maxdata/ALL');
-                if (!array_key_exists('records', $resSscpMaxData)) {
-                    throw new \Exception();
-                }
-            } catch (\Exception $e) {
-                $resSscpMaxData['records'] = [];
-            }
-            $maxData = array_merge($resSptMaxData['records'], $resSscpMaxData['records']); 
-            
+            $varSpt = $this->getVariabili(self::URLALLSPTMAXDATA);            
+            $varSscp = $this->getVariabili(self::URLALLSSCPMAXDATA);            
+            $maxData = array_merge($varSpt, $varSscp);            
             return $maxData;
         // @codeCoverageIgnoreStart
         } catch (\Exception $e) {
@@ -119,6 +151,12 @@ class Sync
         // @codeCoverageIgnoreEnd
     }
     
+    /**
+     * @param array $distinct
+     * @param array $maxData
+     * @return array
+     * @throws \Exception
+     */
     public function getTargetVarMaxDates($distinct, $maxData)
     {
         try {            
@@ -145,6 +183,11 @@ class Sync
         }
     }
     
+    /**
+     * @param array $distData
+     * @return array
+     * @throws \Exception
+     */
     public function getSourceRecords($distData)
     {
         try {            
@@ -156,17 +199,8 @@ class Sync
                 $tipo_dato = $arrCodice[2];
                 $data_iniziale = str_replace(' ', 'T', $data);
                 $data_finale = str_replace(' ', 'T', date('Y-m-d H:i:s'));                
-                try {
-                    $resNewData = $this->callCrudService('http://localhost/crud/api/h1/' . $db . '/dati_acquisiti?var=' . $variabile . '&type=' . $tipo_dato . '&datefrom=' . $data_iniziale . '&dateto=' . $data_finale);
-                    if (array_key_exists('records', $resNewData)) {
-                        $newData[$codice] = $resNewData['records'];
-                    } else {
-                        throw new \Exception();
-                    }                                        
-                } catch (\Exception $e) {
-                    $newData[$codice] = [];
-                    continue;
-                }
+                
+                $newData[$codice] = $this->getVariabili(self::URLSOURCE . '/' . $db . '/dati_acquisiti?var=' . $variabile . '&type=' . $tipo_dato . '&datefrom=' . $data_iniziale . '&dateto=' . $data_finale);
             }            
             return $newData;
         // @codeCoverageIgnoreStart
@@ -177,6 +211,11 @@ class Sync
         // @codeCoverageIgnoreEnd
     }
     
+    /**
+     * @param array $newData
+     * @return array
+     * @throws \Exception
+     */
     public function insertTargetRecords($newData)
     {
         try {            
@@ -188,7 +227,7 @@ class Sync
                 $j = 1;
                 $resInsertData[$codice]['inserted'] = 0;
                 $resInsertData[$codice]['failed'] = 0;
-                foreach ($records as $n_rec => $fields) {
+                foreach ($records as $fields) {
                     $params = [
                         'var' => $fields['variabile'],
                         'type' => $fields['tipo_dato'],
@@ -196,7 +235,7 @@ class Sync
                         'val' => $fields['valore']
                     ];
                     try {
-                        $this->callCrudService('http://localhost/crud/api/h2/' . $db . '/dati_acquisiti', 'POST', $params);
+                        $this->callCrudService(self::URLTARGET . '/' . $db . '/dati_acquisiti', 'POST', $params);
                         $resInsertData[$codice]['inserted'] = $i;
                         $i++;
                     } catch (\Exception $e) {
@@ -215,6 +254,11 @@ class Sync
         // @codeCoverageIgnoreEnd
     }
     
+    /**
+     * @param array $resInsertData
+     * @return array
+     * @throws \Exception
+     */
     public function setResponse($resInsertData)
     {
         try {
