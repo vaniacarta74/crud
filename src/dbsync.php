@@ -9,12 +9,8 @@ header("Content-Type: application/json; charset=UTF-8");
 
 try {
     $sync = new Sync();
-    $distinct = $sync->getVarToSync();
-    $maxData = $sync->getTargetAllMaxDates();
-    $distData = $sync->getTargetVarMaxDates($distinct, $maxData);
-    $newData = $sync->getSourceRecords($distData);
-    $resInsertData = $sync->insertTargetRecords($newData);
-    $response = $sync->setResponse($resInsertData);
+    $sync->run();
+    $response = $sync->getResponse();
     
     $code = $response['ok'] ? 200 : 400;
     http_response_code($code);

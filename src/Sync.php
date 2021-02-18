@@ -8,18 +8,64 @@
 
 namespace vaniacarta74\Crud;
 
+use vaniacarta74\Crud\Accessor;
+use vaniacarta74\Crud\Error;
+use vaniacarta74\Crud\Curl;
 /**
  * Description of Sync
  *
  * @author Vania
  */
-class Sync
+class Sync extends Accessor
 {
     const URLSOURCE = 'http://localhost/crud/api/h1';
     const URLTARGET = 'http://localhost/crud/api/h2';
     const URLALLSYNCVAR = 'http://localhost/crud/api/h1/core/variabili_sync/ALL';
     const URLALLSPTMAXDATA = 'http://localhost/crud/api/h2/spt/vista_variabili_maxdata/ALL';
     const URLALLSSCPMAXDATA = 'http://localhost/crud/api/h2/sscp/vista_variabili_maxdata/ALL';
+    
+    protected $varToSync;
+    protected $targetLastRecords;
+    protected $sourceNewRecords;
+    protected $report;
+    protected $response;
+    
+    /**
+     * @throws \Exception
+     */
+    public function __construct()
+    {
+        try {
+            $this->varToSync = [];
+            $this->targetLastRecords = [];
+            $this->sourceNewRecords = [];
+            $this->report = [];
+            $this->setResponse();
+        // @codeCoverageIgnoreStart
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+        // @codeCoverageIgnoreEnd
+    }
+    
+    /**
+     * @throws \Exception
+     */
+    public function run() {
+        try {
+            $this->setVarToSync();
+            $this->setTargetLastRecords();
+            $this->setSourceNewRecords();
+            $this->setReport();
+            $this->setResponse();
+        // @codeCoverageIgnoreStart
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+        // @codeCoverageIgnoreEnd
+    }
     
     /**
      * @param string $url
@@ -59,15 +105,14 @@ class Sync
     }
     
     /**
-     * @return array
      * @throws \Exception
      */
-    public function getVarToSync()
+    public function setVarToSync()
     {
         try {
             $variabili = $this->getVariabili(self::URLALLSYNCVAR);            
             $distinct = $this->getDistinctVar($variabili);            
-            return $distinct;
+            $this->varToSync = $distinct;
         // @codeCoverageIgnoreStart
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
@@ -152,14 +197,13 @@ class Sync
     }
     
     /**
-     * @param array $distinct
      * @param array $maxData
      * @return array
      * @throws \Exception
      */
     public function getTargetVarMaxDates($distinct, $maxData)
     {
-        try {            
+        try {
             $j = 0;
             $distData = [];
             $iMax = count($maxData);
@@ -184,11 +228,32 @@ class Sync
     }
     
     /**
-     * @param array $distData
-     * @return array
+     * @param array $param
      * @throws \Exception
      */
-    public function getSourceRecords($distData)
+    public function setTargetLastRecords($param = null)
+    {
+        try {
+            $varToSync = isset($param) ? $param : $this->varToSync;
+            if (!is_array($varToSync)) {
+                throw new \Exception('Formato parametro non ammesso');
+            }
+            if (count($varToSync) > 0) {
+                $maxData = $this->getTargetAllMaxDates();
+                $this->targetLastRecords = $this->getTargetVarMaxDates($varToSync, $maxData);
+            } else {
+                $this->targetLastRecords = [];
+            }
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @throws \Exception
+     */
+    public function listSourceNewRecords($distData)
     {
         try {            
             $newData = [];
@@ -209,6 +274,28 @@ class Sync
             throw $e;
         }
         // @codeCoverageIgnoreEnd
+    }
+    
+    /**
+     * @param array $param
+     * @throws \Exception
+     */     
+    public function setSourceNewRecords($param = null)
+    {
+        try {
+            $targetLastRecords = isset($param) ? $param : $this->targetLastRecords;
+            if (!is_array($targetLastRecords)) {
+                throw new \Exception('Formato parametro non ammesso');
+            }
+            if (count($targetLastRecords) > 0) {
+                $this->sourceNewRecords = $this->listSourceNewRecords($targetLastRecords);
+            } else {
+                $this->sourceNewRecords = [];
+            }
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
     }
     
     /**
@@ -255,13 +342,36 @@ class Sync
     }
     
     /**
-     * @param array $resInsertData
-     * @return array
      * @throws \Exception
      */
-    public function setResponse($resInsertData)
+    public function setReport($param = null)
     {
         try {
+            $sourceNewRecords = isset($param) ? $param : $this->sourceNewRecords;
+            if (!is_array($sourceNewRecords)) {
+                throw new \Exception('Formato parametro non ammesso');
+            }
+            if (count($sourceNewRecords) > 0) {
+                $this->report = $this->insertTargetRecords($sourceNewRecords);
+            } else {
+                $this->report = [];
+            }            
+        } catch (\Exception $e) {
+            Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
+            throw $e;
+        }
+    }
+    
+    /**
+     * @throws \Exception
+     */
+    public function setResponse($param = null)
+    {
+        try {
+            $resInsertData = isset($param) ? $param : $this->report;
+            if (!is_array($resInsertData)) {
+                throw new \Exception('Formato parametro non ammesso');
+            }
             $total = 0;
             if (count($resInsertData) > 0) {
                 $response['ok'] = true;
@@ -276,12 +386,10 @@ class Sync
                 $response['codice errore'] = 400;
                 $response['descrizione errore'] = 'Nessuna variabile da sincronizzare trovata';
             }            
-            return $response;
-        // @codeCoverageIgnoreStart
+            $this->response = $response;
         } catch (\Exception $e) {
             Error::printErrorInfo(__FUNCTION__, Error::debugLevel());
             throw $e;
         }
-        // @codeCoverageIgnoreEnd
     }
 }

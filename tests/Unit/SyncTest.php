@@ -10,6 +10,7 @@ namespace vaniacarta74\Crud\tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use vaniacarta74\Crud\Sync;
+use vaniacarta74\Crud\tests\classes\Reflections;
 
 /**
  * Description of SyncTest
@@ -28,6 +29,90 @@ class SyncTest extends TestCase
     protected function tearDown()
     {
         $this->sync = null;
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function constructorProvider()
+    {
+        $data = [
+            'standard' => [
+                'expecteds' => [
+                    'varToSync' => [],
+                    'targetLastRecords' => [],
+                    'sourceNewRecords' => [],
+                    'report' => [],
+                    'response' => [
+                        'ok' => false,
+                        'codice errore' => 400,
+                        'descrizione errore' => 'Nessuna variabile da sincronizzare trovata'
+                    ]
+                ]  
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::__construct
+     * @dataProvider constructorProvider
+     */
+    public function testConstructorEquals($expected)
+    {
+        Reflections::invokeConstructor($this->sync);
+        
+        $actual['varToSync'] = Reflections::getProperty($this->sync, 'varToSync');
+        $actual['targetLastRecords'] = Reflections::getProperty($this->sync, 'targetLastRecords');
+        $actual['sourceNewRecords'] = Reflections::getProperty($this->sync, 'sourceNewRecords');
+        $actual['report'] = Reflections::getProperty($this->sync, 'report');
+        $actual['response'] = Reflections::getProperty($this->sync, 'response');
+        
+        $this->assertEquals($expected, $actual);         
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function runProvider()
+    {
+        $data = [
+            'standard' => [
+                'provider' => 'run.json'
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::run
+     * @dataProvider runProvider
+     */
+    public function testRunEquals($provider)
+    {
+        $this->sync->run();
+        
+        $properties['varToSync'] = Reflections::getProperty($this->sync, 'varToSync');
+        $properties['targetLastRecords'] = Reflections::getProperty($this->sync, 'targetLastRecords');
+        $properties['sourceNewRecords'] = Reflections::getProperty($this->sync, 'sourceNewRecords');
+        $properties['report'] = Reflections::getProperty($this->sync, 'report');
+        $properties['response'] = Reflections::getProperty($this->sync, 'response');
+        
+        $actual = json_encode($properties);
+        
+        $json = file_get_contents(__DIR__ . '/../providers/' . $provider);       
+        $parts = explode('%', $json);
+        
+        foreach ($parts as $expected) {
+            $position = strpos($actual, $expected);
+            $this->assertTrue(is_int($position));
+        }        
     }
     
     /**
@@ -117,7 +202,7 @@ class SyncTest extends TestCase
      * @group sync
      * @coversNothing
      */
-    public function getVarToSyncProvider()
+    public function setVarToSyncProvider()
     {
         $data = [
             'all different' => [
@@ -209,10 +294,10 @@ class SyncTest extends TestCase
     
     /**
      * @group sync
-     * @covers \vaniacarta74\Crud\Sync::getVarToSync
-     * @dataProvider getVarToSyncProvider     
+     * @covers \vaniacarta74\Crud\Sync::setVarToSync
+     * @dataProvider setVarToSyncProvider     
      */
-    public function testGetVarToSyncEquals($rawUrl, $method, $params, $json, $mockReturn, $expected)
+    public function testSetVarToSyncEquals($rawUrl, $method, $params, $json, $mockReturn, $expected)
     {
         $stub = $this->getMockBuilder('\vaniacarta74\Crud\Sync')        
                      ->setMethods(array('callCrudService'))
@@ -223,6 +308,7 @@ class SyncTest extends TestCase
              ->with($rawUrl, $method, $params, $json)
              ->will($this->returnValue($mockReturn));
         
+        $stub->setVarToSync();
         $actual = $stub->getVarToSync();
         
         $this->assertEquals($expected, $actual);
@@ -232,7 +318,7 @@ class SyncTest extends TestCase
      * @group sync
      * @coversNothing
      */
-    public function getVarToSyncExceptionProvider()
+    public function setVarToSyncExceptionProvider()
     {
         $data = [            
             'no codie key' => [
@@ -259,10 +345,10 @@ class SyncTest extends TestCase
     
     /**
      * @group sync
-     * @covers \vaniacarta74\Crud\Sync::getVarToSync
-     * @dataProvider getVarToSyncExceptionProvider     
+     * @covers \vaniacarta74\Crud\Sync::setVarToSync
+     * @dataProvider setVarToSyncExceptionProvider     
      */
-    public function testGetVarToSyncException($rawUrl, $method, $params, $json, $mockReturn)
+    public function testSetVarToSyncException($rawUrl, $method, $params, $json, $mockReturn)
     {
         $this->setExpectedException('Exception');
         
@@ -275,7 +361,7 @@ class SyncTest extends TestCase
              ->with($rawUrl, $method, $params, $json)
              ->will($this->returnValue($mockReturn));
         
-        $stub->getVarToSync();
+        $stub->setVarToSync();
     } 
     
     /**
@@ -684,7 +770,7 @@ class SyncTest extends TestCase
      * @group sync
      * @coversNothing
      */
-    public function getSourceRecordsProvider()
+    public function listSourceNewRecordsProvider()
     {
         $data = [
             'all standard' => [
@@ -953,10 +1039,10 @@ class SyncTest extends TestCase
     
     /**
      * @group sync
-     * @covers \vaniacarta74\Crud\Sync::getSourceRecords
-     * @dataProvider getSourceRecordsProvider     
+     * @covers \vaniacarta74\Crud\Sync::listSourceNewRecords
+     * @dataProvider listSourceNewRecordsProvider     
      */
-    public function testGetSourceRecordsEquals($distData, $params, $expected)
+    public function testListSourceNewRecordsEquals($distData, $params, $expected)
     {
         $index0 = $params[0];
         $index1 = $params[1];
@@ -976,7 +1062,7 @@ class SyncTest extends TestCase
              ->with($index1['url'] . $data_finale, $index1['method'], $index1['params'], $index1['json'])
              ->will($this->returnValue($index1['mockReturn']));
         
-        $actual = $stub->getSourceRecords($distData);
+        $actual = $stub->listSourceNewRecords($distData);
         
         $this->assertEquals($expected, $actual);
     }
@@ -1131,6 +1217,37 @@ class SyncTest extends TestCase
     {
         $data = [
             'standard' => [
+                'param' => [
+                    'SPT.100025.2' => [
+                        'inserted' => 1,
+                        'failed' => 0
+                    ],
+                    'SSCP_data.10.2' => [
+                        'inserted' => 0,
+                        'failed' => 0
+                    ]
+                ],
+                'resInsertData' => [
+                    'SPT.100025.2' => [
+                        'inserted' => 1,
+                        'failed' => 0
+                    ],
+                    'SSCP_data.10.2' => [
+                        'inserted' => 0,
+                        'failed' => 0
+                    ]
+                ],
+                'expected' => [
+                    'ok' => true,
+                    'message' => 'Sincronizzazione ' . MSSQL_HOST . ' => ' . MSSQL_HOST2 . ' avvenuta con successo in: % sec. Record inseriti: 1',
+                    'variabili' => [
+                        'SPT.100025.2' => 'records 1 | riusciti 1 | falliti 0',
+                        'SSCP_data.10.2' => 'records 0 | riusciti 0 | falliti 0'
+                    ]
+                ]
+            ],
+            'no param' => [
+                'param' => null,
                 'resInsertData' => [
                     'SPT.100025.2' => [
                         'inserted' => 1,
@@ -1151,6 +1268,7 @@ class SyncTest extends TestCase
                 ]
             ],
             'failed' => [
+                'param' => null,
                 'resInsertData' => [],
                 'expected' => [
                     'ok' => false,
@@ -1168,9 +1286,11 @@ class SyncTest extends TestCase
      * @covers \vaniacarta74\Crud\Sync::setResponse
      * @dataProvider setResponseProvider     
      */
-    public function testSetResponseEquals($resInsertData, $expecteds)
+    public function testSetResponseEquals($param, $resInsertData, $expecteds)
     {
-        $actuals = $this->sync->setResponse($resInsertData);
+        Reflections::setProperty($this->sync, 'report', $resInsertData);
+        $this->sync->setResponse($param);
+        $actuals = $this->sync->getResponse();
         
         foreach ($expecteds as $key => $responsePart) {
             if ($key === 'message') {
@@ -1183,6 +1303,44 @@ class SyncTest extends TestCase
                 $this->assertEquals($responsePart, $actuals[$key]);
             }
         }        
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function setResponseExceptionProvider()
+    {
+        $data = [
+            'wrong param' => [
+                'param' => 'pippo',
+                'resInsertData' => [
+                    'SPT.100025.2' => [
+                        'inserted' => 1,
+                        'failed' => 0
+                    ],
+                    'SSCP_data.10.2' => [
+                        'inserted' => 0,
+                        'failed' => 0
+                    ]
+                ]
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::setResponse
+     * @dataProvider setResponseExceptionProvider     
+     */
+    public function testSetResponseException($param, $resInsertData)
+    {
+        $this->setExpectedException('Exception');
+        
+        Reflections::setProperty($this->sync, 'report', $resInsertData);
+        $this->sync->setResponse($param);
     }
     
     /**
@@ -1375,5 +1533,559 @@ class SyncTest extends TestCase
         $this->setExpectedException('Exception');
         
         $this->sync->getDistinctVar($variabili);
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function setTargetLastRecordsProvider()
+    {
+        $data = [
+            'standard' => [
+                'param' => null,
+                'mockParams' => [
+                    'all' => [
+                        'mockReturn' => [                            
+                            0 => [
+                                'codice' => 'SPT.100025.2',
+                                'data_e_ora' => '29/05/2020 22:00:00'
+                            ],
+                            1 => [
+                                'codice' => 'SPT.10020.2',
+                                'data_e_ora' => '18/02/2020 11:45:00'
+                            ],
+                            2 => [
+                                'codice' => 'SSCP_data.1.2',
+                                'data_e_ora' => '30/01/2007 08:12:00'
+                            ],
+                            3 => [
+                                'codice' => 'SSCP_data.10.2',
+                                'data_e_ora' => '16/04/2015 12:23:00'
+                            ]                
+                        ]
+                    ],
+                    'var' => [
+                        'varToSync' => [
+                            0 => 'SPT.100025.2',
+                            1 => 'SSCP_data.10.2'
+                        ],
+                        'maxData' => [                            
+                            0 => [
+                                'codice' => 'SPT.100025.2',
+                                'data_e_ora' => '29/05/2020 22:00:00'
+                            ],
+                            1 => [
+                                'codice' => 'SPT.10020.2',
+                                'data_e_ora' => '18/02/2020 11:45:00'
+                            ],
+                            2 => [
+                                'codice' => 'SSCP_data.1.2',
+                                'data_e_ora' => '30/01/2007 08:12:00'
+                            ],
+                            3 => [
+                                'codice' => 'SSCP_data.10.2',
+                                'data_e_ora' => '16/04/2015 12:23:00'
+                            ]                
+                        ],
+                        'mockReturn' => [
+                            'SPT.100025.2' => '29/05/2020 22:00:00',
+                            'SSCP_data.10.2' => '16/04/2015 12:23:00'
+                        ]
+                    ]
+                ],
+                'expected' => [
+                    'SPT.100025.2' => '29/05/2020 22:00:00',
+                    'SSCP_data.10.2' => '16/04/2015 12:23:00'
+                ]
+            ],
+            'no var to sync' => [
+                'param' => null,
+                'mockParams' => [
+                    'all' => [
+                        'mockReturn' => [                            
+                            0 => [
+                                'codice' => 'SPT.100025.2',
+                                'data_e_ora' => '29/05/2020 22:00:00'
+                            ],
+                            1 => [
+                                'codice' => 'SPT.10020.2',
+                                'data_e_ora' => '18/02/2020 11:45:00'
+                            ],
+                            2 => [
+                                'codice' => 'SSCP_data.1.2',
+                                'data_e_ora' => '30/01/2007 08:12:00'
+                            ],
+                            3 => [
+                                'codice' => 'SSCP_data.10.2',
+                                'data_e_ora' => '16/04/2015 12:23:00'
+                            ]                
+                        ]
+                    ],
+                    'var' => [
+                        'varToSync' => [],
+                        'maxData' => [                            
+                            0 => [
+                                'codice' => 'SPT.100025.2',
+                                'data_e_ora' => '29/05/2020 22:00:00'
+                            ],
+                            1 => [
+                                'codice' => 'SPT.10020.2',
+                                'data_e_ora' => '18/02/2020 11:45:00'
+                            ],
+                            2 => [
+                                'codice' => 'SSCP_data.1.2',
+                                'data_e_ora' => '30/01/2007 08:12:00'
+                            ],
+                            3 => [
+                                'codice' => 'SSCP_data.10.2',
+                                'data_e_ora' => '16/04/2015 12:23:00'
+                            ]                
+                        ],
+                        'mockReturn' => [
+                            'SPT.100025.2' => '29/05/2020 22:00:00',
+                            'SSCP_data.10.2' => '16/04/2015 12:23:00'
+                        ]
+                    ]
+                ],
+                'expected' => []
+            ],
+            'param not null' => [
+                'param' => [
+                    0 => 'SPT.100025.2',
+                    1 => 'SSCP_data.10.2'
+                ],
+                'mockParams' => [
+                    'all' => [
+                        'mockReturn' => [                            
+                            0 => [
+                                'codice' => 'SPT.100025.2',
+                                'data_e_ora' => '29/05/2020 22:00:00'
+                            ],
+                            1 => [
+                                'codice' => 'SPT.10020.2',
+                                'data_e_ora' => '18/02/2020 11:45:00'
+                            ],
+                            2 => [
+                                'codice' => 'SSCP_data.1.2',
+                                'data_e_ora' => '30/01/2007 08:12:00'
+                            ],
+                            3 => [
+                                'codice' => 'SSCP_data.10.2',
+                                'data_e_ora' => '16/04/2015 12:23:00'
+                            ]                
+                        ]
+                    ],
+                    'var' => [
+                        'varToSync' => [
+                            0 => 'SPT.100025.2',
+                            1 => 'SSCP_data.10.2'
+                        ],
+                        'maxData' => [                            
+                            0 => [
+                                'codice' => 'SPT.100025.2',
+                                'data_e_ora' => '29/05/2020 22:00:00'
+                            ],
+                            1 => [
+                                'codice' => 'SPT.10020.2',
+                                'data_e_ora' => '18/02/2020 11:45:00'
+                            ],
+                            2 => [
+                                'codice' => 'SSCP_data.1.2',
+                                'data_e_ora' => '30/01/2007 08:12:00'
+                            ],
+                            3 => [
+                                'codice' => 'SSCP_data.10.2',
+                                'data_e_ora' => '16/04/2015 12:23:00'
+                            ]                
+                        ],
+                        'mockReturn' => [
+                            'SPT.100025.2' => '29/05/2020 22:00:00',
+                            'SSCP_data.10.2' => '16/04/2015 12:23:00'
+                        ]
+                    ]
+                ],
+                'expected' => [
+                    'SPT.100025.2' => '29/05/2020 22:00:00',
+                    'SSCP_data.10.2' => '16/04/2015 12:23:00'
+                ]
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::setTargetLastRecords
+     * @dataProvider setTargetLastRecordsProvider     
+     */
+    public function testSetTargetLastRecordsEquals($param, $mockParams, $expected)
+    {
+        $all = $mockParams['all'];
+        $var = $mockParams['var'];
+        
+        $stub = $this->getMockBuilder('\vaniacarta74\Crud\Sync')        
+                     ->setMethods(array('getTargetAllMaxDates', 'getTargetVarMaxDates'))
+                     ->getMock();
+        
+        $stub->expects($this->any())
+             ->method('getTargetAllMaxDates')
+             ->will($this->returnValue($all['mockReturn']));
+        
+        $stub->expects($this->any())
+             ->method('getTargetVarMaxDates')
+             ->with($var['varToSync'], $var['maxData'])
+             ->will($this->returnValue($var['mockReturn']));
+        
+        Reflections::setProperty($stub, 'varToSync', $var['varToSync']);
+        $stub->setTargetLastRecords($param);
+        $actual = $stub->getTargetLastRecords();
+        
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function setTargetLastRecordsExceptionProvider()
+    {
+        $data = [            
+            'wrong param' => [
+                'param' => 'pippo'
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::setTargetLastRecords
+     * @dataProvider setTargetLastRecordsExceptionProvider     
+     */
+    public function testSetTargetLastRecordsException($param)
+    {
+        $this->setExpectedException('Exception');
+        
+        $this->sync->setTargetLastRecords($param);
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function setSourceNewRecordsProvider()
+    {
+        $data = [
+            'standard' => [
+                'param' => null,
+                'mockParams' => [
+                    'list' => [
+                        'targetLastRecords' => [
+                            'SPT.100025.2' => '29/05/2020 22:00:00',
+                            'SSCP_data.10.2' => '16/04/2015 12:23:00'
+                        ],
+                        'mockReturn' => [
+                            'SPT.100025.2' => [],
+                            'SSCP_data.10.2' => [
+                                0 => [
+                                    "id" => "101500160",
+                                    "variabile" => "10",
+                                    "valore" => "1.779999971389771",
+                                    "data_e_ora" => "16/04/2015 13:00:00",
+                                    "tipo_dato" => "2",
+                                    "link" => "/h1/sscp/dati_acquisiti/101500160"
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                'expected' => [
+                    'SPT.100025.2' => [],
+                    'SSCP_data.10.2' => [
+                        0 => [
+                            "id" => "101500160",
+                            "variabile" => "10",
+                            "valore" => "1.779999971389771",
+                            "data_e_ora" => "16/04/2015 13:00:00",
+                            "tipo_dato" => "2",
+                            "link" => "/h1/sscp/dati_acquisiti/101500160"
+                        ]
+                    ]
+                ]
+            ],
+            'array void' => [
+                'param' => null,
+                'mockParams' => [
+                    'list' => [
+                        'targetLastRecords' => [],
+                        'mockReturn' => []
+                    ]
+                ],
+                'expected' => []
+            ],
+            'param no null' => [
+                'param' => [
+                    'SPT.100025.2' => '29/05/2020 22:00:00',
+                    'SSCP_data.10.2' => '16/04/2015 12:23:00'
+                ],
+                'mockParams' => [
+                    'list' => [
+                        'targetLastRecords' => [
+                            'SPT.100025.2' => '29/05/2020 22:00:00',
+                            'SSCP_data.10.2' => '16/04/2015 12:23:00'
+                        ],
+                        'mockReturn' => [
+                            'SPT.100025.2' => [],
+                            'SSCP_data.10.2' => [
+                                0 => [
+                                    "id" => "101500160",
+                                    "variabile" => "10",
+                                    "valore" => "1.779999971389771",
+                                    "data_e_ora" => "16/04/2015 13:00:00",
+                                    "tipo_dato" => "2",
+                                    "link" => "/h1/sscp/dati_acquisiti/101500160"
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                'expected' => [
+                    'SPT.100025.2' => [],
+                    'SSCP_data.10.2' => [
+                        0 => [
+                            "id" => "101500160",
+                            "variabile" => "10",
+                            "valore" => "1.779999971389771",
+                            "data_e_ora" => "16/04/2015 13:00:00",
+                            "tipo_dato" => "2",
+                            "link" => "/h1/sscp/dati_acquisiti/101500160"
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::setSourceNewRecords
+     * @dataProvider setSourceNewRecordsProvider     
+     */
+    public function testSetSourceNewRecordsEquals($param, $mockParams, $expected)
+    {
+        $list = $mockParams['list'];
+        
+        $stub = $this->getMockBuilder('\vaniacarta74\Crud\Sync')        
+                     ->setMethods(array('listSourceNewRecords'))
+                     ->getMock();
+        
+        $stub->expects($this->any())
+             ->method('listSourceNewRecords')
+             ->with($list['targetLastRecords'])
+             ->will($this->returnValue($list['mockReturn']));
+        
+        Reflections::setProperty($stub, 'targetLastRecords', $list['targetLastRecords']);
+        $stub->setSourceNewRecords($param);
+        $actual = $stub->getSourceNewRecords();
+        
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function setSourceNewRecordsExceptionProvider()
+    {
+        $data = [            
+            'wrong param' => [
+                'param' => 'pippo'
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::setSourceNewRecords
+     * @dataProvider setSourceNewRecordsExceptionProvider     
+     */
+    public function testSetSourceNewRecordsException($param)
+    {
+        $this->setExpectedException('Exception');
+        
+        $this->sync->setSourceNewRecords($param);
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function setReportProvider()
+    {
+        $data = [
+            'standard' => [
+                'param' => null,
+                'mockParams' => [
+                    'insert' => [
+                        'sourceNewRecords' => [
+                            'SPT.100025.2' => [],
+                            'SSCP_data.10.2' => [
+                                0 => [
+                                    "id" => "101500160",
+                                    "variabile" => "10",
+                                    "valore" => "1.779999971389771",
+                                    "data_e_ora" => "16/04/2015 13:00:00",
+                                    "tipo_dato" => "2",
+                                    "link" => "/h1/sscp/dati_acquisiti/101500160"
+                                ]
+                            ]
+                        ],
+                        'mockReturn' => [
+                            'SPT.100025.2' => [
+                                'inserted' => 0,
+                                'failed' => 0
+                            ],
+                            'SSCP_data.10.2' => [
+                                'inserted' => 1,
+                                'failed' => 0
+                            ]
+                        ]
+                    ]
+                ],
+                'expected' => [
+                    'SPT.100025.2' => [
+                        'inserted' => 0,
+                        'failed' => 0
+                    ],
+                    'SSCP_data.10.2' => [
+                        'inserted' => 1,
+                        'failed' => 0
+                    ]
+                ]
+            ],
+            'array void' => [
+                'param' => null,
+                'mockParams' => [
+                    'insert' => [
+                        'sourceNewRecords' => [],
+                        'mockReturn' => []
+                    ]
+                ],
+                'expected' => []
+            ],
+            'param no null' => [
+                'param' => [
+                    'SPT.100025.2' => [],
+                    'SSCP_data.10.2' => [
+                        0 => [
+                            "id" => "101500160",
+                            "variabile" => "10",
+                            "valore" => "1.779999971389771",
+                            "data_e_ora" => "16/04/2015 13:00:00",
+                            "tipo_dato" => "2",
+                            "link" => "/h1/sscp/dati_acquisiti/101500160"
+                        ]
+                    ]
+                ],
+                'mockParams' => [
+                    'insert' => [
+                        'sourceNewRecords' => [
+                            'SPT.100025.2' => [],
+                            'SSCP_data.10.2' => [
+                                0 => [
+                                    "id" => "101500160",
+                                    "variabile" => "10",
+                                    "valore" => "1.779999971389771",
+                                    "data_e_ora" => "16/04/2015 13:00:00",
+                                    "tipo_dato" => "2",
+                                    "link" => "/h1/sscp/dati_acquisiti/101500160"
+                                ]
+                            ]
+                        ],
+                        'mockReturn' => [
+                            'SPT.100025.2' => [
+                                'inserted' => 0,
+                                'failed' => 0
+                            ],
+                            'SSCP_data.10.2' => [
+                                'inserted' => 1,
+                                'failed' => 0
+                            ]
+                        ]
+                    ]
+                ],
+                'expected' => [
+                    'SPT.100025.2' => [
+                        'inserted' => 0,
+                        'failed' => 0
+                    ],
+                    'SSCP_data.10.2' => [
+                        'inserted' => 1,
+                        'failed' => 0
+                    ]
+                ]
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::setReport
+     * @dataProvider setReportProvider     
+     */
+    public function testSetReportEquals($param, $mockParams, $expected)
+    {
+        $insert = $mockParams['insert'];
+        
+        $stub = $this->getMockBuilder('\vaniacarta74\Crud\Sync')        
+                     ->setMethods(array('listSourceNewRecords'))
+                     ->getMock();
+        
+        $stub->expects($this->any())
+             ->method('listSourceNewRecords')
+             ->with($insert['sourceNewRecords'])
+             ->will($this->returnValue($insert['mockReturn']));
+        
+        Reflections::setProperty($stub, 'sourceNewRecords', $insert['sourceNewRecords']);
+        $stub->setReport($param);
+        $actual = $stub->getReport();
+        
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * @group sync
+     * @coversNothing
+     */
+    public function setReportExceptionProvider()
+    {
+        $data = [            
+            'wrong param' => [
+                'param' => 'pippo'
+            ]
+        ];
+        
+        return $data;
+    }
+    
+    /**
+     * @group sync
+     * @covers \vaniacarta74\Crud\Sync::setReport
+     * @dataProvider setReportExceptionProvider     
+     */
+    public function testSetReportException($param)
+    {
+        $this->setExpectedException('Exception');
+        
+        $this->sync->setReport($param);
     }
 }
